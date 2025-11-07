@@ -2,8 +2,6 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Noto_Sans_Devanagari, Baloo_Bhai_2, Mukta, Inter, Khand } from 'next/font/google';
 import { generateOrganizationSchema } from '@/lib/seo';
-import { BackToTop } from '@/components/BackToTop';
-import { Header } from '@/components/Header';
 import { LeftSliderProvider } from '@/contexts/LeftSliderContext';
 
 const notoSansDevanagari = Noto_Sans_Devanagari({ 
@@ -118,11 +116,7 @@ export default function RootLayout({
           <a href="#main-content" className="skip-link">
             मुख्य सामग्रीमा जानुहोस्
           </a>
-          <Header />
-          <div className="min-h-screen w-full overflow-x-hidden page-enter">
-            {children}
-          </div>
-          <BackToTop />
+          {children}
         </LeftSliderProvider>
       </body>
     </html>
