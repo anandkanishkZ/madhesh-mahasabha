@@ -2,12 +2,28 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Section, SectionHeader, SectionTitle, SectionDescription } from '@/components/ui/Section';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Footer } from '@/components/Footer';
-import { JoinStrip } from '@/components/JoinStrip';
 import { submitJoinForm } from '@/lib/firebaseService';
-import { CheckCircle, Users, Shield, Heart, ArrowRight, User, Mail, Phone, MapPin, Briefcase, GraduationCap, Calendar, UserCheck, ChevronUp } from 'lucide-react';
+import { 
+  CheckCircle, 
+  Users, 
+  Shield, 
+  Heart, 
+  ArrowRight, 
+  User, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Briefcase, 
+  GraduationCap, 
+  Calendar, 
+  UserCheck, 
+  ChevronDown,
+  Sparkles,
+  Target,
+  Award,
+  Globe
+} from 'lucide-react';
 
 interface FormData {
   fullName: string;
@@ -190,35 +206,67 @@ export default function JoinPage() {
   if (isSubmitted) {
     return (
       <>
-        <main id="main-content">
-          <Section className="py-24">
-            <div className="max-w-2xl mx-auto text-center">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="w-10 h-10 text-green-600" />
+        <main id="main-content" className="min-h-screen flex items-center justify-center bg-green-50 relative overflow-hidden">
+          {/* Animated background circles */}
+          <div className="absolute top-20 left-20 w-72 h-72 bg-green-200/30 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-mm-primary/20 rounded-full blur-3xl animate-pulse delay-700"></div>
+          
+          <div className="max-w-2xl mx-auto text-center px-4 relative z-10">
+            {/* Success Icon with animation */}
+            <div className="relative inline-block mb-8">
+              <div className="w-32 h-32 bg-green-500 rounded-full flex items-center justify-center mx-auto shadow-2xl animate-bounce">
+                <CheckCircle className="w-16 h-16 text-white" strokeWidth={3} />
               </div>
-              
-              <h1 className="nepali-heading text-3xl lg:text-4xl font-bold text-mm-ink mb-6">
-                स्वागत छ मधेश महासभामा!
-              </h1>
-              
-              <p className="nepali-text text-lg text-gray-700 mb-6">
-                तपाईंको सदस्यता आवेदन सफलतापूर्वक पेश भएको छ। हामी छिट्टै तपाईंलाई सम्पर्क गर्नेछौं।
-              </p>
-              
-              <p className="nepali-text text-sm text-gray-600 mb-8">
-                तपाईंको योगदानले मधेशी समुदायको सशक्तिकरणमा महत्वपूर्ण भूमिका खेल्नेछ।
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button onClick={() => setIsSubmitted(false)} className="bg-mm-primary hover:bg-mm-primary/90">
-                  अर्को आवेदन पेश गर्नुहोस्
-                </Button>
-                <Button variant="outline" asChild>
-                  <a href="/">गृहपृष्ठमा फर्किनुहोस्</a>
-                </Button>
+              {/* Decorative rings */}
+              <div className="absolute inset-0 w-32 h-32 bg-green-300 rounded-full animate-ping opacity-20"></div>
+              <div className="absolute -top-2 -right-2">
+                <Sparkles className="w-8 h-8 text-yellow-400 animate-pulse" />
+              </div>
+              <div className="absolute -bottom-2 -left-2">
+                <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse delay-500" />
               </div>
             </div>
-          </Section>
+            
+            <h1 className="nepali-heading text-4xl lg:text-5xl font-bold text-mm-ink mb-6">
+              स्वागत छ मधेश महासभामा!
+            </h1>
+            
+            <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200 mb-8">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Award className="w-8 h-8 text-green-600" />
+              </div>
+              
+              <p className="nepali-text text-xl text-gray-700 mb-4">
+                तपाईंको सदस्यता आवेदन सफलतापूर्वक पेश भएको छ।
+              </p>
+              
+              <p className="nepali-text text-lg text-gray-600 mb-6">
+                हामी छिट्टै तपाईंलाई सम्पर्क गर्नेछौं र मधेश महासभाको गतिविधिहरूमा सहभागी गराउनेछौं।
+              </p>
+              
+              <div className="bg-mm-primary/5 rounded-xl p-4 border border-mm-primary/20">
+                <p className="nepali-text text-sm text-mm-primary font-semibold">
+                  ✨ तपाईंको योगदानले मधेशी समुदायको सशक्तिकरणमा महत्वपूर्ण भूमिका खेल्नेछ।
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                onClick={() => setIsSubmitted(false)} 
+                className="bg-mm-primary hover:bg-mm-primary/90 text-white px-8 py-4 text-lg"
+              >
+                अर्को आवेदन पेश गर्नुहोस्
+              </Button>
+              <Button 
+                variant="outline" 
+                className="px-8 py-4 text-lg border-2"
+                asChild
+              >
+                <a href="/">गृहपृष्ठमा फर्किनुहोस्</a>
+              </Button>
+            </div>
+          </div>
         </main>
         <Footer />
       </>
@@ -227,53 +275,68 @@ export default function JoinPage() {
 
   return (
     <>
-      <main id="main-content">
+      <main id="main-content" className="bg-gray-50">
         {/* Hero Section */}
-        <section className="relative min-h-[60vh] lg:min-h-[70vh] flex items-center mithila-pattern">
-          <div className="absolute inset-0 bg-mm-bg"></div>
+        <section className="relative min-h-[80vh] flex items-center overflow-hidden">
+          {/* Animated background */}
+          <div className="absolute inset-0 bg-mm-primary/5"></div>
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-mm-primary/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-mm-accent/5 rounded-full blur-3xl"></div>
           
-          <div className="container-custom relative z-10">
-            <div className="max-w-4xl">
-              <h1 className="nepali-heading text-4xl sm:text-5xl lg:text-6xl font-bold text-mm-ink mb-6 leading-tight">
-                मधेश महासभामा सामेल हुनुहोस्
+          <div className="container-custom relative z-10 py-20">
+            <div className="max-w-6xl mx-auto text-center">
+              {/* Badge */}
+              <div className="inline-block mb-8">
+                <div className="flex items-center gap-2 bg-white px-5 py-2.5 rounded-full shadow-lg border border-gray-200">
+                  <Globe className="w-5 h-5 text-mm-primary" />
+                  <span className="nepali-heading text-sm font-semibold text-mm-primary">
+                    सदस्यता फारम
+                  </span>
+                </div>
+              </div>
+              
+              <h1 className="nepali-heading text-5xl md:text-6xl lg:text-7xl font-bold text-mm-ink mb-6 leading-tight">
+                मधेश महासभामा<br />
+                <span className="text-mm-primary">सामेल हुनुहोस्</span>
               </h1>
               
-              <p className="nepali-text text-xl lg:text-2xl text-gray-700 mb-8 max-w-3xl leading-relaxed">
+              <p className="nepali-text text-xl lg:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
                 मधेशी जनताको अधिकार, समानता र सम्मानका लागि हामीसँग मिलेर काम गर्नुहोस्
               </p>
               
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 lg:gap-8 mt-12">
-                <div className="text-center sm:text-left">
-                  <div className="w-12 h-12 bg-mm-primary/10 rounded-lg flex items-center justify-center mb-4 mx-auto sm:mx-0">
-                    <Users className="w-6 h-6 text-mm-primary" />
+              {/* Value Props */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all group">
+                  <div className="w-16 h-16 bg-mm-primary rounded-xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
+                    <Users className="w-8 h-8 text-white" />
                   </div>
-                  <div className="text-2xl lg:text-3xl font-bold text-mm-primary nepali-heading mb-2">
+                  <h3 className="nepali-heading text-2xl font-bold text-mm-ink mb-2">
                     एकता
-                  </div>
+                  </h3>
                   <p className="nepali-text text-gray-600">
                     मधेशी समुदायको एकजुट आवाज
                   </p>
                 </div>
                 
-                <div className="text-center sm:text-left">
-                  <div className="w-12 h-12 bg-mm-accent/10 rounded-lg flex items-center justify-center mb-4 mx-auto sm:mx-0">
-                    <Shield className="w-6 h-6 text-mm-accent" />
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all group">
+                  <div className="w-16 h-16 bg-mm-accent rounded-xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
+                    <Shield className="w-8 h-8 text-white" />
                   </div>
-                  <div className="text-2xl lg:text-3xl font-bold text-mm-accent nepali-heading mb-2">
+                  <h3 className="nepali-heading text-2xl font-bold text-mm-accent mb-2">
                     अधिकार
-                  </div>
+                  </h3>
                   <p className="nepali-text text-gray-600">
                     न्यायसंगत हिस्सेदारी र अधिकार
                   </p>
                 </div>
                 
-                <div className="text-center sm:text-left">
-                  <div className="w-12 h-12 bg-mm-warm/10 rounded-lg flex items-center justify-center mb-4 mx-auto sm:mx-0">
-                    <Heart className="w-6 h-6 text-mm-warm" />
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all group">
+                  <div className="w-16 h-16 bg-mm-warm rounded-xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
+                    <Heart className="w-8 h-8 text-white" />
                   </div>
-                  <div className="text-2xl lg:text-3xl font-bold text-mm-warm nepali-heading mb-2">
+                  <h3 className="nepali-heading text-2xl font-bold text-mm-warm mb-2">
                     सेवा
-                  </div>
+                  </h3>
                   <p className="nepali-text text-gray-600">
                     समुदायको सेवामा समर्पित
                   </p>
@@ -284,316 +347,389 @@ export default function JoinPage() {
         </section>
 
         {/* Benefits Section */}
-        <Section>
-          <SectionHeader centered>
-            <SectionTitle>सदस्यताका फाइदाहरू</SectionTitle>
-            <SectionDescription className="mx-auto">
-              मधेश महासभाको सदस्य बनेर तपाईंले पाउने अवसरहरू
-            </SectionDescription>
-          </SectionHeader>
+        <section className="py-16 lg:py-24 bg-gray-50">
+          <div className="container-custom">
+            <div className="text-center mb-16">
+              <h2 className="nepali-heading text-4xl lg:text-5xl font-bold text-mm-ink mb-4">
+                सदस्यताका फाइदाहरू
+              </h2>
+              <p className="nepali-text text-xl text-gray-600 max-w-2xl mx-auto">
+                मधेश महासभाको सदस्य बनेर तपाईंले पाउने अवसरहरू
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="text-center hover:shadow-lg transition-shadow duration-300">
-              <CardContent className="pt-6">
-                <div className="w-12 h-12 bg-mm-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-6 h-6 text-mm-primary" />
-                </div>
-                <h3 className="nepali-heading font-semibold text-lg mb-2">
-                  राजनीतिक सहभागिता
-                </h3>
-                <p className="nepali-text text-sm text-gray-600">
-                  नीति निर्माणमा प्रत्यक्ष योगदान र राजनीतिक गतिविधिमा सहभागिता
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center hover:shadow-lg transition-shadow duration-300">
-              <CardContent className="pt-6">
-                <div className="w-12 h-12 bg-mm-accent/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <GraduationCap className="w-6 h-6 text-mm-accent" />
-                </div>
-                <h3 className="nepali-heading font-semibold text-lg mb-2">
-                  नेतृत्व विकास
-                </h3>
-                <p className="nepali-text text-sm text-gray-600">
-                  नेतृत्व क्षमता विकास र समुदायिक नेतृत्वमा अवसर
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center hover:shadow-lg transition-shadow duration-300">
-              <CardContent className="pt-6">
-                <div className="w-12 h-12 bg-mm-warm/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Shield className="w-6 h-6 text-mm-warm" />
-                </div>
-                <h3 className="nepali-heading font-semibold text-lg mb-2">
-                  अधिकार संरक्षण
-                </h3>
-                <p className="nepali-text text-sm text-gray-600">
-                  मधेशी समुदायका अधिकारको संरक्षण र उत्थानमा योगदान
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center hover:shadow-lg transition-shadow duration-300">
-              <CardContent className="pt-6">
-                <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-6 h-6 text-green-600" />
-                </div>
-                <h3 className="nepali-heading font-semibold text-lg mb-2">
-                  सञ्जाल निर्माण
-                </h3>
-                <p className="nepali-text text-sm text-gray-600">
-                  राष्ट्रिय र अन्तर्राष्ट्रिय स्तरमा व्यापक सञ्जाल निर्माण
-                </p>
-              </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+              {[
+                {
+                  icon: Users,
+                  title: 'राजनीतिक सहभागिता',
+                  desc: 'नीति निर्माणमा प्रत्यक्ष योगदान र राजनीतिक गतिविधिमा सहभागिता',
+                  color: 'bg-blue-500'
+                },
+                {
+                  icon: Target,
+                  title: 'नेतृत्व विकास',
+                  desc: 'नेतृत्व क्षमता विकास र समुदायिक नेतृत्वमा अवसर',
+                  color: 'bg-green-500'
+                },
+                {
+                  icon: Shield,
+                  title: 'अधिकार संरक्षण',
+                  desc: 'मधेशी समुदायका अधिकारको संरक्षण र उत्थानमा योगदान',
+                  color: 'bg-purple-500'
+                },
+                {
+                  icon: Globe,
+                  title: 'सञ्जाल निर्माण',
+                  desc: 'राष्ट्रिय र अन्तर्राष्ट्रिय स्तरमा व्यापक सञ्जाल निर्माण',
+                  color: 'bg-orange-500'
+                }
+              ].map((benefit, idx) => {
+                const Icon = benefit.icon;
+                return (
+                  <div 
+                    key={idx}
+                    className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-xl transition-all duration-300 group"
+                  >
+                    <div className={`w-14 h-14 ${benefit.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                      <Icon className="w-7 h-7 text-white" />
+                    </div>
+                    <h3 className="nepali-heading text-xl font-bold text-mm-ink mb-3">
+                      {benefit.title}
+                    </h3>
+                    <p className="nepali-text text-base text-gray-600 leading-relaxed">
+                      {benefit.desc}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </Section>
+        </section>
 
         {/* Form Section */}
-        <Section className="bg-gray-50">
-          <div className="max-w-4xl mx-auto">
-            <SectionHeader centered>
-              <SectionTitle>सदस्यता आवेदन फारम</SectionTitle>
-              <SectionDescription className="mx-auto">
+        <section className="py-16 lg:py-24">
+          <div className="container-custom max-w-4xl">
+            <div className="text-center mb-12">
+              <h2 className="nepali-heading text-4xl lg:text-5xl font-bold text-mm-ink mb-4">
+                सदस्यता आवेदन फारम
+              </h2>
+              <p className="nepali-text text-xl text-gray-600">
                 तलको फारम भरेर मधेश महासभाको सदस्यता लिनुहोस्
-              </SectionDescription>
-            </SectionHeader>
+              </p>
+            </div>
 
-            <Card className="shadow-lg">
-              <CardContent className="p-8">
-                {submitError && (
-                  <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                      <div className="ml-3">
-                        <p className="text-sm">{submitError}</p>
-                      </div>
+            <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 p-8 lg:p-12">
+              {submitError && (
+                <div className="mb-8 p-5 bg-red-50 border-l-4 border-red-500 rounded-r-xl">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-base text-red-700 nepali-text font-medium">{submitError}</p>
                     </div>
                   </div>
-                )}
+                </div>
+              )}
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Personal Information Section */}
+                <div>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 bg-mm-primary/10 rounded-lg flex items-center justify-center">
+                      <User className="w-5 h-5 text-mm-primary" />
+                    </div>
+                    <h3 className="nepali-heading text-2xl font-bold text-mm-ink">
+                      व्यक्तिगत जानकारी
+                    </h3>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Full Name */}
-                    <div>
+                    <div className="relative">
                       <label className="block nepali-text text-sm font-semibold text-gray-700 mb-2">
-                        <User className="w-4 h-4 inline mr-2" />
                         पूरा नाम *
                       </label>
-                      <input
-                        type="text"
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleInputChange}
-                        className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-mm-primary focus:border-transparent transition-colors ${
-                          errors.fullName ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400'
-                        }`}
-                        placeholder="तपाईंको पूरा नाम लेख्नुहोस्"
-                      />
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                          <User className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="text"
+                          name="fullName"
+                          value={formData.fullName}
+                          onChange={handleInputChange}
+                          className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-mm-primary/50 transition-all text-lg ${
+                            errors.fullName ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400 focus:border-mm-primary'
+                          }`}
+                          placeholder="तपाईंको पूरा नाम"
+                        />
+                      </div>
                       {errors.fullName && (
-                        <p className="text-red-500 text-sm mt-1 nepali-text">{errors.fullName}</p>
+                        <p className="text-red-500 text-sm mt-2 nepali-text flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                          {errors.fullName}
+                        </p>
                       )}
                     </div>
 
                     {/* Email */}
-                    <div>
+                    <div className="relative">
                       <label className="block nepali-text text-sm font-semibold text-gray-700 mb-2">
-                        <Mail className="w-4 h-4 inline mr-2" />
                         इमेल ठेगाना *
                       </label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-mm-primary focus:border-transparent transition-colors ${
-                          errors.email ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400'
-                        }`}
-                        placeholder="example@email.com"
-                      />
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                          <Mail className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-mm-primary/50 transition-all text-lg ${
+                            errors.email ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400 focus:border-mm-primary'
+                          }`}
+                          placeholder="example@email.com"
+                        />
+                      </div>
                       {errors.email && (
-                        <p className="text-red-500 text-sm mt-1 nepali-text">{errors.email}</p>
+                        <p className="text-red-500 text-sm mt-2 nepali-text flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                          {errors.email}
+                        </p>
                       )}
                     </div>
 
                     {/* Phone */}
-                    <div>
+                    <div className="relative">
                       <label className="block nepali-text text-sm font-semibold text-gray-700 mb-2">
-                        <Phone className="w-4 h-4 inline mr-2" />
                         फोन नम्बर *
                       </label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-mm-primary focus:border-transparent transition-colors ${
-                          errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400'
-                        }`}
-                        placeholder="९८XXXXXXXX"
-                      />
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                          <Phone className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-mm-primary/50 transition-all text-lg ${
+                            errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400 focus:border-mm-primary'
+                          }`}
+                          placeholder="९८XXXXXXXX"
+                        />
+                      </div>
                       {errors.phone && (
-                        <p className="text-red-500 text-sm mt-1 nepali-text">{errors.phone}</p>
+                        <p className="text-red-500 text-sm mt-2 nepali-text flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                          {errors.phone}
+                        </p>
                       )}
                     </div>
 
                     {/* Address */}
-                    <div>
+                    <div className="relative">
                       <label className="block nepali-text text-sm font-semibold text-gray-700 mb-2">
-                        <MapPin className="w-4 h-4 inline mr-2" />
                         ठेगाना *
                       </label>
-                      <input
-                        type="text"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleInputChange}
-                        className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-mm-primary focus:border-transparent transition-colors ${
-                          errors.address ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400'
-                        }`}
-                        placeholder="वडा, नगरपालिका, जिल्ला, प्रदेश"
-                      />
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                          <MapPin className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="text"
+                          name="address"
+                          value={formData.address}
+                          onChange={handleInputChange}
+                          className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-mm-primary/50 transition-all text-lg ${
+                            errors.address ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400 focus:border-mm-primary'
+                          }`}
+                          placeholder="वडा, नगरपालिका, जिल्ला, प्रदेश"
+                        />
+                      </div>
                       {errors.address && (
-                        <p className="text-red-500 text-sm mt-1 nepali-text">{errors.address}</p>
+                        <p className="text-red-500 text-sm mt-2 nepali-text flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                          {errors.address}
+                        </p>
                       )}
                     </div>
 
                     {/* Occupation */}
-                    <div>
+                    <div className="relative">
                       <label className="block nepali-text text-sm font-semibold text-gray-700 mb-2">
-                        <Briefcase className="w-4 h-4 inline mr-2" />
                         पेशा
                       </label>
-                      <input
-                        type="text"
-                        name="occupation"
-                        value={formData.occupation}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mm-primary focus:border-transparent hover:border-gray-400 transition-colors"
-                        placeholder="तपाईंको पेशा"
-                      />
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                          <Briefcase className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="text"
+                          name="occupation"
+                          value={formData.occupation}
+                          onChange={handleInputChange}
+                          className="w-full pl-12 pr-4 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-mm-primary/50 hover:border-gray-400 focus:border-mm-primary transition-all text-lg"
+                          placeholder="तपाईंको पेशा"
+                        />
+                      </div>
                     </div>
 
                     {/* Education */}
-                    <div>
+                    <div className="relative">
                       <label className="block nepali-text text-sm font-semibold text-gray-700 mb-2">
-                        <GraduationCap className="w-4 h-4 inline mr-2" />
                         शिक्षा
                       </label>
-                      <input
-                        type="text"
-                        name="education"
-                        value={formData.education}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mm-primary focus:border-transparent hover:border-gray-400 transition-colors"
-                        placeholder="तपाईंको शैक्षिक योग्यता"
-                      />
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                          <GraduationCap className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="text"
+                          name="education"
+                          value={formData.education}
+                          onChange={handleInputChange}
+                          className="w-full pl-12 pr-4 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-mm-primary/50 hover:border-gray-400 focus:border-mm-primary transition-all text-lg"
+                          placeholder="तपाईंको शैक्षिक योग्यता"
+                        />
+                      </div>
                     </div>
 
                     {/* Birth Date */}
-                    <div>
+                    <div className="relative">
                       <label className="block nepali-text text-sm font-semibold text-gray-700 mb-2">
-                        <Calendar className="w-4 h-4 inline mr-2" />
                         जन्म मिति
                       </label>
-                      <input
-                        type="date"
-                        name="birthDate"
-                        value={formData.birthDate}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mm-primary focus:border-transparent hover:border-gray-400 transition-colors"
-                      />
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                          <Calendar className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="date"
+                          name="birthDate"
+                          value={formData.birthDate}
+                          onChange={handleInputChange}
+                          className="w-full pl-12 pr-4 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-mm-primary/50 hover:border-gray-400 focus:border-mm-primary transition-all text-lg"
+                        />
+                      </div>
                     </div>
 
                     {/* Gender */}
-                    <div>
+                    <div className="relative">
                       <label className="block nepali-text text-sm font-semibold text-gray-700 mb-2">
-                        <UserCheck className="w-4 h-4 inline mr-2" />
                         लिङ्ग
                       </label>
                       <div className="relative">
+                        <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                          <UserCheck className="w-5 h-5 text-gray-400" />
+                        </div>
                         <select
                           name="gender"
                           value={formData.gender}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mm-primary focus:border-transparent hover:border-gray-400 transition-colors appearance-none bg-white"
+                          className="w-full pl-12 pr-10 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-mm-primary/50 hover:border-gray-400 focus:border-mm-primary transition-all appearance-none bg-white text-lg cursor-pointer"
                         >
                           <option value="">छान्नुहोस्</option>
                           <option value="male">पुरुष</option>
                           <option value="female">महिला</option>
                           <option value="other">अन्य</option>
                         </select>
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                          <div className="bg-mm-primary rounded-full p-1">
-                            <ChevronUp className="w-3 h-3 text-white" />
-                          </div>
+                        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                          <ChevronDown className="w-5 h-5 text-gray-400" />
                         </div>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  {/* Additional Info */}
+                {/* Motivation Section */}
+                <div className="border-t border-gray-200 pt-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 bg-mm-accent/10 rounded-lg flex items-center justify-center">
+                      <Heart className="w-5 h-5 text-mm-accent" />
+                    </div>
+                    <h3 className="nepali-heading text-2xl font-bold text-mm-ink">
+                      सामेल हुने कारण
+                    </h3>
+                  </div>
+
                   <div>
                     <label className="block nepali-text text-sm font-semibold text-gray-700 mb-2">
-                      सामेल हुने कारण *
+                      तपाईं किन मधेश महासभामा सामेल हुन चाहनुहुन्छ? *
                     </label>
                     <textarea
                       name="additionalInfo"
                       value={formData.additionalInfo}
-                      onChange={(e) => {
-                        handleInputChange(e);
-                      }}
-                      rows={4}
-                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-mm-primary focus:border-transparent transition-colors ${
-                        errors.additionalInfo ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400'
+                      onChange={handleInputChange}
+                      rows={5}
+                      className={`w-full px-5 py-4 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-mm-primary/50 transition-all text-lg resize-none ${
+                        errors.additionalInfo ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400 focus:border-mm-primary'
                       }`}
-                      placeholder="तपाईं किन मधेश महासभामा सामेल हुन चाहनुहुन्छ? आफ्ना लक्ष्य र उद्देश्यहरू लेख्नुहोस्। (कम्तिमा २० अक्षर)"
+                      placeholder="आफ्ना लक्ष्य र उद्देश्यहरू लेख्नुहोस्। तपाईंको योगदानले मधेशी समुदायलाई कसरी फाइदा पुग्नेछ? (कम्तिमा २० अक्षर)"
                     />
                     {errors.additionalInfo && (
-                      <p className="text-red-500 text-sm mt-1 nepali-text">{errors.additionalInfo}</p>
+                      <p className="text-red-500 text-sm mt-2 nepali-text flex items-center gap-1">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        {errors.additionalInfo}
+                      </p>
                     )}
-                    <p className="text-xs text-gray-500 mt-1 nepali-text">
-                      {formData.additionalInfo.length}/200 अक्षर
-                    </p>
-                  </div>
-
-                  <div className="pt-6">
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      size="lg"
-                      className="w-full bg-mm-primary hover:bg-mm-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isSubmitting ? (
-                        <div className="flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                          पेश गरिँदै...
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center">
-                          सदस्यता फारम पेश गर्नुहोस्
-                          <ArrowRight className="w-5 h-5 ml-2" />
-                        </div>
+                    <div className="flex justify-between items-center mt-2">
+                      <p className="text-sm text-gray-500 nepali-text">
+                        {formData.additionalInfo.length}/200 अक्षर
+                      </p>
+                      {formData.additionalInfo.length >= 20 && (
+                        <p className="text-sm text-green-600 nepali-text flex items-center gap-1">
+                          <CheckCircle className="w-4 h-4" />
+                          राम्रो!
+                        </p>
                       )}
-                    </Button>
-
-                    <p className="text-xs text-gray-500 mt-4 text-center nepali-text">
-                      * आवश्यक क्षेत्रहरू। तपाईंको जानकारी सुरक्षित राखिनेछ।
-                    </p>
+                    </div>
                   </div>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        </Section>
+                </div>
 
-        <JoinStrip />
+                {/* Submit Button */}
+                <div className="border-t border-gray-200 pt-8">
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-gradient-to-r from-mm-primary to-mm-primary/90 hover:from-mm-primary/90 hover:to-mm-primary text-white py-5 text-xl font-bold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center justify-center gap-3">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                        <span className="nepali-heading">पेश गरिँदै...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center gap-3 nepali-heading">
+                        <span>सदस्यता फारम पेश गर्नुहोस्</span>
+                        <ArrowRight className="w-6 h-6" />
+                      </div>
+                    )}
+                  </Button>
+
+                  <p className="text-sm text-gray-500 mt-4 text-center nepali-text">
+                    * आवश्यक क्षेत्रहरू। तपाईंको जानकारी सुरक्षित राखिनेछ र गोपनीय रहनेछ।
+                  </p>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
       </main>
       
       <Footer />

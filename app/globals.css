@@ -893,3 +893,92 @@ html, body {
 .custom-scrollbar {
   scroll-behavior: smooth;
 }
+
+/* Manifesto Page Styles */
+html {
+  scroll-behavior: smooth;
+}
+
+.manifesto-content h2 {
+  position: relative;
+  padding-top: 2rem;
+}
+
+.manifesto-content h2::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--mm-primary), var(--mm-accent));
+  border-radius: 2px;
+}
+
+/* Print Styles for Manifesto */
+@media print {
+  @page {
+    margin: 2cm;
+    size: A4;
+  }
+  
+  body {
+    font-size: 12pt;
+    line-height: 1.6;
+    color: #000;
+  }
+  
+  .manifesto-content h1 {
+    font-size: 24pt;
+    margin-bottom: 12pt;
+    page-break-after: avoid;
+  }
+  
+  .manifesto-content h2 {
+    font-size: 18pt;
+    margin-top: 18pt;
+    margin-bottom: 10pt;
+    page-break-after: avoid;
+  }
+  
+  .manifesto-content h3 {
+    font-size: 14pt;
+    margin-top: 12pt;
+    margin-bottom: 8pt;
+    page-break-after: avoid;
+  }
+  
+  .manifesto-content p {
+    margin-bottom: 8pt;
+    orphans: 3;
+    widows: 3;
+  }
+  
+  /* Hide navigation, buttons, and decorative elements */
+  nav, aside, button, .no-print,
+  header, footer, .join-strip {
+    display: none !important;
+  }
+  
+  /* Show only main content */
+  article {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Prevent page breaks inside important elements */
+  blockquote, pre, table {
+    page-break-inside: avoid;
+  }
+  
+  /* Add page breaks before major sections */
+  .manifesto-content h2 {
+    page-break-before: always;
+  }
+  
+  .manifesto-content h2:first-of-type {
+    page-break-before: avoid;
+  }
+}
