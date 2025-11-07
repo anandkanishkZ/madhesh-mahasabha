@@ -1,0 +1,35 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Main circle background -->
+  <circle cx="60" cy="60" r="56" fill="#135D3B" stroke="#C62828" stroke-width="3"/>
+  
+  <!-- Inner decorative circle -->
+  <circle cx="60" cy="60" r="45" fill="none" stroke="#F4A300" stroke-width="2" stroke-dasharray="8 4"/>
+  
+  <!-- Central lotus-like pattern -->
+  <g transform="translate(60,60)">
+    <!-- Top petal -->
+    <path d="M0,-25 Q-8,-15 0,-5 Q8,-15 0,-25" fill="#F4A300"/>
+    
+    <!-- Right petal -->
+    <path d="M25,0 Q15,8 5,0 Q15,-8 25,0" fill="#F4A300"/>
+    
+    <!-- Bottom petal -->
+    <path d="M0,25 Q8,15 0,5 Q-8,15 0,25" fill="#F4A300"/>
+    
+    <!-- Left petal -->
+    <path d="M-25,0 Q-15,-8 -5,0 Q-15,8 -25,0" fill="#F4A300"/>
+    
+    <!-- Center circle -->
+    <circle cx="0" cy="0" r="8" fill="#C62828"/>
+    <circle cx="0" cy="0" r="4" fill="#FAF8F3"/>
+  </g>
+  
+  <!-- Decorative elements around the circle -->
+  <g transform="translate(60,60)">
+    <!-- Small circles at cardinal points -->
+    <circle cx="0" cy="-50" r="3" fill="#F4A300"/>
+    <circle cx="50" cy="0" r="3" fill="#F4A300"/>
+    <circle cx="0" cy="50" r="3" fill="#F4A300"/>
+    <circle cx="-50" cy="0" r="3" fill="#F4A300"/>
+  </g>
+</svg>
