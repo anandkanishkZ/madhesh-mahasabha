@@ -4,28 +4,48 @@ import { useEffect } from 'react';
 
 export function useScrollAnimation() {
   useEffect(() => {
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
+    // Small delay to ensure DOM is fully ready
+    const initTimeout = setTimeout(() => {
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+          }
+        });
+      }, observerOptions);
+
+      // Observe all elements with scroll animation classes
+      const animatedElements = document.querySelectorAll(
+        '.animate-on-scroll, .animate-on-scroll-left, .animate-on-scroll-right, .animate-on-scroll-scale'
+      );
+
+      // Immediately show elements that are already in viewport
+      animatedElements.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
+        
+        if (isInViewport) {
+          // Add class immediately for elements in viewport on load
+          el.classList.add('is-visible');
         }
+        
+        observer.observe(el);
       });
-    }, observerOptions);
 
-    // Observe all elements with scroll animation classes
-    const animatedElements = document.querySelectorAll(
-      '.animate-on-scroll, .animate-on-scroll-left, .animate-on-scroll-right, .animate-on-scroll-scale'
-    );
-
-    animatedElements.forEach((el) => observer.observe(el));
+      // Cleanup function
+      return () => {
+        animatedElements.forEach((el) => observer.unobserve(el));
+        observer.disconnect();
+      };
+    }, 50); // Small delay to ensure DOM is ready
 
     return () => {
-      animatedElements.forEach((el) => observer.unobserve(el));
+      clearTimeout(initTimeout);
     };
   }, []);
 }

@@ -1,12 +1,20 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { useScrollAnimation } from '@/hooks/useAnimations';
 import { ArrowRight, Sparkles } from 'lucide-react';
 
 export function Hero() {
+  const [isClient, setIsClient] = useState(false);
+  
   useScrollAnimation();
+  
+  useEffect(() => {
+    // Ensure client-side rendering is complete
+    setIsClient(true);
+  }, []);
   
   return (
     <section className="relative min-h-[85vh] lg:min-h-[92vh] flex items-center overflow-hidden">
@@ -23,7 +31,7 @@ export function Hero() {
       <div className="container-custom relative z-10 py-12 lg:py-20">
         <div className="max-w-5xl mx-auto">
           {/* Badge */}
-          <div className="inline-flex items-center space-x-2 bg-mm-primary/10 backdrop-blur-sm border border-mm-primary/20 rounded-full px-5 py-2 mb-8 animate-on-scroll">
+          <div className={`inline-flex items-center space-x-2 bg-mm-primary/10 backdrop-blur-sm border border-mm-primary/20 rounded-full px-5 py-2 mb-8 ${isClient ? 'animate-on-scroll' : 'opacity-100'}`}>
             <Sparkles className="w-4 h-4 text-mm-primary" />
             <span className="text-sm font-nepali-body font-semibold text-mm-primary">
               एकता, समानता र अधिकारको अभियान
@@ -31,7 +39,7 @@ export function Hero() {
           </div>
           
           {/* Main Heading */}
-          <h1 className="nepali-heading text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold text-mm-ink mb-8 leading-[1.25] animate-on-scroll">
+          <h1 className={`nepali-heading text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold text-mm-ink mb-8 leading-[1.25] ${isClient ? 'animate-on-scroll' : 'opacity-100'}`}>
             मधेश र मधेशीको
             <span className="block mt-2 bg-gradient-to-r from-mm-primary via-mm-accent to-mm-warm bg-clip-text text-transparent leading-[1.25]">
               एकता, समानता र अधिकार
@@ -39,16 +47,16 @@ export function Hero() {
           </h1>
           
           {/* Subtitle */}
-          <p className="nepali-text text-2xl sm:text-3xl lg:text-4xl text-gray-700 mb-6 max-w-4xl font-medium leading-relaxed animate-on-scroll" style={{animationDelay: '0.1s'}}>
+          <p className={`nepali-text text-2xl sm:text-3xl lg:text-4xl text-gray-700 mb-6 max-w-4xl font-medium leading-relaxed ${isClient ? 'animate-on-scroll' : 'opacity-100'}`} style={{animationDelay: '0.1s'}}>
             मधेश महासभा
           </p>
           
-          <p className="nepali-text text-xl sm:text-2xl text-gray-600 mb-10 max-w-3xl leading-relaxed animate-on-scroll" style={{animationDelay: '0.2s'}}>
+          <p className={`nepali-text text-xl sm:text-2xl text-gray-600 mb-10 max-w-3xl leading-relaxed ${isClient ? 'animate-on-scroll' : 'opacity-100'}`} style={{animationDelay: '0.2s'}}>
             समान हिस्सेदारी, सम्मान र समृद्धिका साझा अभियान
           </p>
           
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-16 animate-on-scroll" style={{animationDelay: '0.3s'}}>
+          <div className={`flex flex-col sm:flex-row gap-4 sm:gap-6 mb-16 ${isClient ? 'animate-on-scroll' : 'opacity-100'}`} style={{animationDelay: '0.3s'}}>
             <Button size="lg" asChild className="w-full sm:w-auto group text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all">
               <Link href="/join" className="flex items-center justify-center space-x-2">
                 <span>सदस्यता ग्रहण गर्नुहोस्</span>
@@ -62,8 +70,8 @@ export function Hero() {
           </div>
           
           {/* Value Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 stagger-children">
-            <div className="group relative bg-white/80 backdrop-blur-sm border-2 border-mm-primary/10 rounded-2xl p-6 lg:p-8 hover:border-mm-primary/30 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <div className={`grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 ${isClient ? 'stagger-children' : ''}`}>
+            <div className={`group relative bg-white/80 backdrop-blur-sm border-2 border-mm-primary/10 rounded-2xl p-6 lg:p-8 hover:border-mm-primary/30 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${isClient ? '' : 'opacity-100'}`}>
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-mm-primary to-mm-primary/50 rounded-t-2xl"></div>
               <div className="text-4xl lg:text-5xl font-extrabold text-mm-primary nepali-heading mb-3">
                 एकता
@@ -73,7 +81,7 @@ export function Hero() {
               </p>
             </div>
             
-            <div className="group relative bg-white/80 backdrop-blur-sm border-2 border-mm-accent/10 rounded-2xl p-6 lg:p-8 hover:border-mm-accent/30 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className={`group relative bg-white/80 backdrop-blur-sm border-2 border-mm-accent/10 rounded-2xl p-6 lg:p-8 hover:border-mm-accent/30 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${isClient ? '' : 'opacity-100'}`}>
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-mm-accent to-mm-accent/50 rounded-t-2xl"></div>
               <div className="text-4xl lg:text-5xl font-extrabold text-mm-accent nepali-heading mb-3">
                 समानता
@@ -83,7 +91,7 @@ export function Hero() {
               </p>
             </div>
             
-            <div className="group relative bg-white/80 backdrop-blur-sm border-2 border-mm-warm/10 rounded-2xl p-6 lg:p-8 hover:border-mm-warm/30 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className={`group relative bg-white/80 backdrop-blur-sm border-2 border-mm-warm/10 rounded-2xl p-6 lg:p-8 hover:border-mm-warm/30 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${isClient ? '' : 'opacity-100'}`}>
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-mm-warm to-mm-warm/50 rounded-t-2xl"></div>
               <div className="text-4xl lg:text-5xl font-extrabold text-mm-warm nepali-heading mb-3">
                 अधिकार

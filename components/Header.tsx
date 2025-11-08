@@ -23,7 +23,7 @@ const navigation = [
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
-    const { openSlider } = useLeftSliderContext();
+  const { openSlider } = useLeftSliderContext();
   const pathname = usePathname();
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export function Header() {
     <>
       <header 
         className={cn(
-          'sticky top-0 z-50 w-full transition-all duration-500 border-b bg-white/95 backdrop-blur-md shadow-lg border-gray-200/50 animate-fade-in-down'
+          'sticky top-0 z-50 w-full transition-all duration-500 border-b bg-white/95 backdrop-blur-md shadow-lg border-gray-200/50'
         )}
         style={{ position: 'sticky', top: 0, zIndex: 50 }}
       >
@@ -53,7 +53,7 @@ export function Header() {
               <button
                 type="button"
                 onClick={openSlider}
-                className="p-2 rounded-lg text-gray-700 hover:text-mm-primary hover:bg-mm-primary/10 transition-all duration-300 focus-ring mr-4 hover-scale hover-glow"
+                className="p-2 rounded-lg text-gray-700 hover:text-mm-primary hover:bg-mm-primary/10 transition-all duration-300 focus-ring mr-4"
                 aria-label="द्रुत पहुँच मेनु खोल्नुहोस्"
               >
                 <PanelLeft className="w-5 h-5" />
@@ -63,30 +63,59 @@ export function Header() {
             {/* Logo */}
             <Link 
               href="/" 
-              className="flex items-center space-x-2 focus-ring rounded-md hover-scale"
+              className="flex items-center space-x-2 focus-ring rounded-md"
               aria-label="मधेश महासभा गृहपृष्ठमा जानुहोस्"
             >
-              <div className="text-xl sm:text-2xl lg:text-3xl nepali-heading font-bold text-mm-primary hover-glow transition-all duration-300">
+              <div className="text-xl sm:text-2xl lg:text-3xl nepali-heading font-bold text-mm-primary transition-all duration-300">
                 मधेश महासभा
               </div>
             </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center space-x-1">
-              {navigation.map((item, index) => {
-                const isActive = pathname === item.href;
+              {navigation.map((item) => {
+                // Handle trailing slash - normalize both pathname and href
+                const normalizedPathname = pathname.endsWith('/') && pathname !== '/' 
+                  ? pathname.slice(0, -1) 
+                  : pathname;
+                const normalizedHref = item.href.endsWith('/') && item.href !== '/' 
+                  ? item.href.slice(0, -1) 
+                  : item.href;
+                const isActive = normalizedPathname === normalizedHref;
+                
+                // Debug logging
+                if (typeof window !== 'undefined') {
+                  console.log(`[Header Debug] Item: ${item.name}, href: ${normalizedHref}, pathname: ${normalizedPathname}, isActive: ${isActive}`);
+                }
+                
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
+                    data-active={isActive ? 'true' : 'false'}
+                    style={{
+                      color: isActive ? '#135D3B' : '#374151',
+                      backgroundColor: isActive ? 'rgba(19, 93, 59, 0.1)' : 'transparent',
+                      transition: 'all 0.3s ease'
+                    }}
                     className={cn(
-                      'px-4 py-2 rounded-md font-nepali-heading font-medium transition-all duration-300 focus-ring nav-item hover-lift relative overflow-hidden',
-                      isActive 
-                        ? 'text-mm-primary bg-mm-primary/10 active' 
-                        : 'text-gray-700 hover:text-mm-primary hover:bg-mm-primary/5'
+                      'px-4 py-2 rounded-md font-nepali-heading font-medium nav-item relative overflow-hidden',
+                      'focus:outline-none focus-visible:ring-2 focus-visible:ring-mm-primary focus-visible:ring-offset-2',
+                      isActive ? 'active' : ''
                     )}
+                    onMouseEnter={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.color = '#135D3B';
+                        e.currentTarget.style.backgroundColor = 'rgba(19, 93, 59, 0.05)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.color = '#374151';
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
+                    }}
                     aria-current={isActive ? 'page' : undefined}
-                    style={{animationDelay: `${index * 0.1}s`}}
                   >
                     {item.name}
                   </Link>

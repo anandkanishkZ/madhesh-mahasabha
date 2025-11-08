@@ -710,13 +710,35 @@ html, body {
   left: 0;
   width: 0;
   height: 2px;
-  background: var(--mm-primary);
+  background: #135D3B;
   transition: width 0.3s ease;
 }
 
-.nav-item:hover::after,
-.nav-item.active::after {
+.nav-item:hover::after {
   width: 100%;
+}
+
+.nav-item.active::after,
+.nav-item[data-active="true"]::after {
+  width: 100% !important;
+}
+
+/* Active Navigation Item - Force styling */
+.nav-item.active,
+.nav-item[data-active="true"] {
+  color: #135D3B !important;
+  background-color: rgba(19, 93, 59, 0.1) !important;
+}
+
+/* Prevent hover from overriding active state */
+.nav-item.active:hover,
+.nav-item[data-active="true"]:hover,
+.nav-item.active:focus,
+.nav-item[data-active="true"]:focus,
+.nav-item.active:active,
+.nav-item[data-active="true"]:active {
+  color: #135D3B !important;
+  background-color: rgba(19, 93, 59, 0.1) !important;
 }
 
 /* Card Animations */

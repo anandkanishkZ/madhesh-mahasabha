@@ -11,7 +11,7 @@ import fs from 'fs';
 import path from 'path';
 
 export const metadata: Metadata = generateMetadata({
-  title: 'प्रस्तावना - मधेश महासभा',
+  title: 'प्रस्तावना र संस्थापक दस्तावेज',
   description: 'मधेश महासभाको पूर्ण प्रस्तावना पढ्नुहोस्। मधेशी समुदायको एकता, समानता र अधिकारका लागि हाम्रो दर्शन र योजना।',
   path: '/manifesto',
   type: 'article',

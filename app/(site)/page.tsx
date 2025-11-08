@@ -10,6 +10,12 @@ import { Shield, Users, Scale, ArrowRight } from 'lucide-react';
 import agendaData from '@/content/agenda.np.json';
 import newsData from '@/content/news.json';
 import { generateWebsiteSchema } from '@/lib/seo';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'मधेश क्षेत्रको अधिकार र स्वायत्तता',
+  description: 'मधेश महासभा - मधेश क्षेत्रको समावेशिता, संघीयता र नागरिक अधिकारको लागि समर्पित राजनीतिक संगठन। समानता, न्याय र सम्मानको लागि हाम्रो आन्दोलनमा सहभागी हुनुहोस्।',
+};
 
 export default function Home() {
   const websiteSchema = generateWebsiteSchema('https://madheshmahasabha.com');
