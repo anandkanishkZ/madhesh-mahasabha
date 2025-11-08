@@ -19,6 +19,7 @@ const navigation = [
   { name: 'समाचार', name_en: 'News', href: '/news' },
   { name: 'संसाधन', name_en: 'Resources', href: '/resources' },
   { name: 'सम्पर्क', name_en: 'Contact', href: '/contact' },
+  { name: 'मिसन प्रतिनिधिसभा', name_en: 'Mission Representative', href: '/mission-representative', special: true },
 ];
 
 export function Header() {
@@ -94,23 +95,36 @@ export function Header() {
                     href={item.href}
                     data-active={isActive ? 'true' : 'false'}
                     style={{
-                      color: isActive ? '#135D3B' : '#374151',
-                      backgroundColor: isActive ? 'rgba(19, 93, 59, 0.1)' : 'transparent',
-                      transition: 'all 0.3s ease'
+                      color: item.special ? '#ffffff' : (isActive ? '#135D3B' : '#374151'),
+                      backgroundColor: item.special 
+                        ? (isActive ? '#D97706' : '#F59E0B') 
+                        : (isActive ? 'rgba(19, 93, 59, 0.1)' : 'transparent'),
+                      transition: 'all 0.3s ease',
+                      boxShadow: item.special ? '0 4px 12px rgba(245, 158, 11, 0.3)' : 'none',
+                      fontWeight: item.special ? '600' : '500'
                     }}
                     className={cn(
                       'px-4 py-2 rounded-md font-nepali-heading font-medium nav-item relative overflow-hidden',
                       'focus:outline-none focus-visible:ring-2 focus-visible:ring-mm-primary focus-visible:ring-offset-2',
-                      isActive ? 'active' : ''
+                      isActive ? 'active' : '',
+                      item.special ? 'animate-pulse-slow' : ''
                     )}
                     onMouseEnter={(e) => {
-                      if (!isActive) {
+                      if (item.special) {
+                        e.currentTarget.style.backgroundColor = '#D97706';
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                        e.currentTarget.style.boxShadow = '0 6px 16px rgba(217, 119, 6, 0.4)';
+                      } else if (!isActive) {
                         e.currentTarget.style.color = '#135D3B';
                         e.currentTarget.style.backgroundColor = 'rgba(19, 93, 59, 0.05)';
                       }
                     }}
                     onMouseLeave={(e) => {
-                      if (!isActive) {
+                      if (item.special) {
+                        e.currentTarget.style.backgroundColor = isActive ? '#D97706' : '#F59E0B';
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(245, 158, 11, 0.3)';
+                      } else if (!isActive) {
                         e.currentTarget.style.color = '#374151';
                         e.currentTarget.style.backgroundColor = 'transparent';
                       }
