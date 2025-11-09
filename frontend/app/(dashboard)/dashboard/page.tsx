@@ -17,10 +17,12 @@ import {
   Search,
   Menu,
   X,
-  ExternalLink
+  ExternalLink,
+  Target
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { logout, isAuthenticated } from '@/lib/api';
 
 interface UserData {
   username: string;
@@ -61,29 +63,37 @@ export default function DashboardPage() {
 
   useEffect(() => {
     // Check authentication
-    const authToken = localStorage.getItem('mm_auth_token');
-    const storedUserData = localStorage.getItem('mm_user_data');
+    const checkAuth = () => {
+      if (!isAuthenticated()) {
+        router.replace('/login');
+        return;
+      }
 
-    if (!authToken || !storedUserData) {
-      router.push('/login');
-      return;
-    }
+      const storedUserData = localStorage.getItem('mm_user_data');
+      if (!storedUserData) {
+        router.replace('/login');
+        return;
+      }
 
-    try {
-      const parsedUserData = JSON.parse(storedUserData);
-      setUserData(parsedUserData);
-    } catch (error) {
-      console.error('Error parsing user data:', error);
-      router.push('/login');
-    } finally {
-      setIsLoading(false);
-    }
+      try {
+        const parsedUserData = JSON.parse(storedUserData);
+        setUserData(parsedUserData);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        router.replace('/login');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
   }, [router]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('mm_auth_token');
-    localStorage.removeItem('mm_user_data');
-    router.push('/login');
+  const handleLogout = async () => {
+    // Call backend logout API
+    await logout();
+    // Redirect to login page - use replace to prevent back button issues
+    router.replace('/login');
   };
 
   if (isLoading) {
@@ -178,9 +188,13 @@ export default function DashboardPage() {
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}>
           <nav className="p-4 space-y-2">
-            <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-mm-primary/10 text-mm-primary font-semibold">
+            <a href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-mm-primary/10 text-mm-primary font-semibold">
               <BarChart3 className="w-5 h-5" />
               <span>Dashboard</span>
+            </a>
+            <a href="/dashboard/mission-representatives" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-mm-bg transition-colors text-mm-ink">
+              <Target className="w-5 h-5" />
+              <span>Mission Representatives</span>
             </a>
             <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-mm-bg transition-colors text-mm-ink">
               <Users className="w-5 h-5" />

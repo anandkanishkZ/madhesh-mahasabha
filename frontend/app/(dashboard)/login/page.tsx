@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lock, User, Eye, EyeOff } from 'lucide-react';
+import { login, setAuthToken, isAuthenticated } from '@/lib/api';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,48 +16,68 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  // Demo credentials (in real app, this would be validated against backend)
-  const DEMO_CREDENTIALS = {
-    username: 'admin',
-    password: 'madhesh123'
-  };
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
     // Check if already logged in
-    const authToken = localStorage.getItem('mm_auth_token');
-    if (authToken) {
-      router.push('/dashboard');
-    }
+    const checkAuth = () => {
+      if (isAuthenticated()) {
+        router.replace('/dashboard');
+      } else {
+        setIsChecking(false);
+      }
+    };
+    
+    checkAuth();
   }, [router]);
+
+  // Show loading while checking authentication
+  if (isChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-mm-bg via-white to-mm-primary/5">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-mm-primary border-t-transparent mx-auto mb-4"></div>
+          <p className="text-mm-ink font-semibold">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+    try {
+      // Call backend API
+      const response = await login({ username, password });
 
-    if (username === DEMO_CREDENTIALS.username && password === DEMO_CREDENTIALS.password) {
-      // Create auth token and user data
-      const authToken = btoa(`${username}:${Date.now()}`);
-      const userData = {
-        username,
-        name: 'Administrator',
-        email: 'admin@madheshmahasabha.com',
-        role: 'System Administrator',
-        loginTime: new Date().toISOString()
-      };
+      if (response.success && response.data) {
+        // Store JWT token
+        setAuthToken(response.data.token);
 
-      // Store in localStorage
-      localStorage.setItem('mm_auth_token', authToken);
-      localStorage.setItem('mm_user_data', JSON.stringify(userData));
+        // Store user data
+        const userData = {
+          id: response.data.admin.id,
+          username: response.data.admin.username,
+          name: response.data.admin.name,
+          email: response.data.admin.email,
+          role: response.data.admin.role,
+          isActive: response.data.admin.isActive,
+          lastLogin: response.data.admin.lastLogin,
+          loginTime: new Date().toISOString()
+        };
+        localStorage.setItem('mm_user_data', JSON.stringify(userData));
 
-      // Redirect to dashboard
-      router.push('/dashboard');
-    } else {
-      setError('Invalid username or password. Please try again.');
+        // Redirect to dashboard - use replace to prevent back button issues
+        router.replace('/dashboard');
+      } else {
+        setError(response.error || 'Login failed. Please try again.');
+        setIsLoading(false);
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('An unexpected error occurred. Please try again.');
       setIsLoading(false);
     }
   };
@@ -78,6 +99,15 @@ export default function LoginPage() {
           <p className="text-muted-foreground text-sm">
             Sign in to continue
           </p>
+          
+          {/* Development credentials helper */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-left text-xs">
+              <p className="font-semibold text-blue-900 mb-1">Default Credentials:</p>
+              <p className="text-blue-700">Username: <span className="font-mono font-bold">admin</span> <span className="text-blue-500">or</span> <span className="font-mono font-bold">admin@madheshmahasabha.com</span></p>
+              <p className="text-blue-700">Password: <span className="font-mono font-bold">Admin@123456</span></p>
+            </div>
+          )}
         </CardHeader>
 
         <CardContent>
@@ -92,14 +122,14 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <label htmlFor="username" className="text-sm font-medium text-mm-ink">
-                Username
+                Username or Email
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
                   id="username"
                   type="text"
-                  placeholder="admin"
+                  placeholder="admin or admin@madheshmahasabha.com"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="pl-10 h-12 border-2 focus:border-mm-primary"
@@ -155,11 +185,11 @@ export default function LoginPage() {
 
             <div className="mt-6 p-4 bg-mm-bg/50 rounded-lg border border-mm-primary/20">
               <p className="text-xs text-muted-foreground text-center mb-2 font-semibold">
-                Demo Credentials:
+                Admin Credentials:
               </p>
               <div className="text-xs space-y-1 font-mono">
                 <p className="text-center"><strong>Username:</strong> admin</p>
-                <p className="text-center"><strong>Password:</strong> madhesh123</p>
+                <p className="text-center"><strong>Password:</strong> Admin@123456</p>
               </div>
             </div>
           </form>

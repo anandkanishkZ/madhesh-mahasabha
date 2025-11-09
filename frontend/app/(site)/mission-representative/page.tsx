@@ -270,23 +270,67 @@ export default function MissionRepresentativePage() {
     setIsSubmitting(true);
 
     try {
-      // Simulate API call (since we're not using Firebase)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      console.log('Form Data Submitted:', {
-        ...formData,
-        photoFile: formData.photoFile?.name,
-        citizenshipFile: formData.citizenshipFile?.name,
-        resumeFile: formData.resumeFile?.name,
-      });
-
-      setSubmitSuccess(true);
+      // Import the API functions
+      const { submitMissionRepresentative, uploadMissionRepresentativeFiles } = await import('@/lib/api');
       
-      // Reset form after successful submission
-      setTimeout(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }, 100);
+      // First, upload files if any
+      let fileUrls: any = {};
+      if (formData.photoFile || formData.citizenshipFile || formData.resumeFile) {
+        const uploadResponse = await uploadMissionRepresentativeFiles({
+          photo: formData.photoFile || undefined,
+          citizenship: formData.citizenshipFile || undefined,
+          educationCert: formData.resumeFile || undefined,
+        });
 
+        if (uploadResponse.success && uploadResponse.data) {
+          fileUrls = uploadResponse.data;
+        } else {
+          alert('फाईल अपलोड गर्नमा समस्या भयो। कृपया पुन: प्रयास गर्नुहोस्।');
+          setIsSubmitting(false);
+          return;
+        }
+      }
+      
+      // Prepare data for API (match backend schema)
+      const apiData = {
+        fullName: formData.fullName,
+        dateOfBirth: formData.dateOfBirth,
+        gender: formData.gender,
+        contactNumber: formData.contactNumber,
+        email: formData.email,
+        province: formData.province,
+        district: formData.district,
+        constituency: formData.constituency,
+        municipality: formData.municipality,
+        wardNumber: formData.wardNo,
+        currentAddress: `${formData.municipality}, Ward ${formData.wardNo}, ${formData.district}, ${formData.province}`,
+        educationLevel: formData.education,
+        institutionName: formData.organization || undefined,
+        fieldOfStudy: formData.occupation || undefined,
+        positionInterested: formData.positionInterested,
+        politicalExperience: formData.politicalExperience || undefined,
+        keyIssues: formData.keyIssues,
+        whyJoin: formData.campaignObjective || undefined,
+        photoUrl: fileUrls.photoUrl || undefined,
+        citizenshipUrl: fileUrls.citizenshipUrl || undefined,
+        educationCertUrl: fileUrls.educationCertUrl || undefined,
+        agreeTerms: formData.confirmTruth,
+        agreePrivacy: formData.agreeContact,
+      };
+
+      // Submit to backend
+      const response = await submitMissionRepresentative(apiData);
+
+      if (response.success) {
+        setSubmitSuccess(true);
+        
+        // Scroll to top
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
+      } else {
+        alert(response.error || 'फारम पेश गर्नमा समस्या भयो। कृपया पुन: प्रयास गर्नुहोस्।');
+      }
     } catch (error) {
       console.error('Submission error:', error);
       alert('फारम पेश गर्नमा समस्या भयो। कृपया पुन: प्रयास गर्नुहोस्।');

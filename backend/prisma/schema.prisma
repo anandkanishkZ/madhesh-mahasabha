@@ -1,0 +1,174 @@
+// Prisma Schema for Madhesh Mahasabha Backend
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Admin Users - For dashboard authentication
+model Admin {
+  id            String    @id @default(cuid())
+  username      String    @unique
+  email         String    @unique
+  password      String    // Hashed password
+  name          String
+  role          String    @default("admin")
+  isActive      Boolean   @default(true)
+  lastLogin     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  
+  @@map("admins")
+}
+
+// Session Management
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  adminId      String
+  admin        Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  
+  @@map("sessions")
+}
+
+// Mission Representative Applications
+model MissionRepresentative {
+  id                    String    @id @default(cuid())
+  // Personal Information
+  fullName              String
+  dateOfBirth           DateTime
+  age                   Int
+  gender                String
+  contactNumber         String
+  email                 String
+  
+  // Address Information
+  province              String
+  district              String
+  constituency          String
+  municipality          String
+  wardNumber            String
+  currentAddress        String
+  
+  // Education
+  educationLevel        String
+  institutionName       String?
+  fieldOfStudy          String?
+  
+  // Political Interest
+  politicalExperience   String?
+  positionInterested    String
+  keyIssues             String[]  // Array of issues
+  whyJoin               String?
+  
+  // Documents (URLs to uploaded files)
+  photoUrl              String?
+  citizenshipUrl        String?
+  educationCertUrl      String?
+  
+  // Declarations
+  agreeTerms            Boolean   @default(false)
+  agreePrivacy          Boolean   @default(false)
+  
+  // Metadata
+  status                String    @default("pending") // pending, approved, rejected
+  submittedAt           DateTime  @default(now())
+  reviewedAt            DateTime?
+  reviewedBy            String?
+  notes                 String?
+  
+  @@map("mission_representatives")
+  @@index([email])
+  @@index([status])
+  @@index([district])
+}
+
+// Contact Messages
+model ContactMessage {
+  id            String   @id @default(cuid())
+  name          String
+  email         String
+  phone         String?
+  subject       String
+  message       String   @db.Text
+  organization  String?
+  status        String   @default("unread") // unread, read, responded
+  createdAt     DateTime @default(now())
+  respondedAt   DateTime?
+  response      String?  @db.Text
+  
+  @@map("contact_messages")
+  @@index([status])
+  @@index([createdAt])
+}
+
+// Membership Applications
+model Membership {
+  id            String   @id @default(cuid())
+  fullName      String
+  email         String
+  phone         String
+  address       String
+  occupation    String?
+  education     String?
+  experience    String?  @db.Text
+  motivation    String?  @db.Text
+  status        String   @default("pending")
+  submittedAt   DateTime @default(now())
+  reviewedAt    DateTime?
+  reviewedBy    String?
+  
+  @@map("memberships")
+  @@index([email])
+  @@index([status])
+}
+
+// News/Updates
+model News {
+  id            String   @id @default(cuid())
+  title         String
+  titleNp       String   // Nepali title
+  content       String   @db.Text
+  contentNp     String   @db.Text
+  excerpt       String?
+  excerptNp     String?
+  category      String
+  tags          String[]
+  imageUrl      String?
+  author        String
+  publishedAt   DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  isPublished   Boolean  @default(false)
+  viewCount     Int      @default(0)
+  
+  @@map("news")
+  @@index([category])
+  @@index([publishedAt])
+  @@index([isPublished])
+}
+
+// Activity Logs - For audit trail
+model ActivityLog {
+  id          String   @id @default(cuid())
+  adminId     String?
+  action      String   // login, logout, create, update, delete, etc.
+  entity      String   // admin, member, news, etc.
+  entityId    String?
+  details     String?  @db.Text
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  
+  @@map("activity_logs")
+  @@index([adminId])
+  @@index([action])
+  @@index([createdAt])
+}
