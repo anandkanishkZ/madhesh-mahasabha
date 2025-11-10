@@ -16,32 +16,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isChecking, setIsChecking] = useState(true);
-
-  useEffect(() => {
-    // Check if already logged in
-    const checkAuth = () => {
-      if (isAuthenticated()) {
-        router.replace('/dashboard');
-      } else {
-        setIsChecking(false);
-      }
-    };
-    
-    checkAuth();
-  }, [router]);
-
-  // Show loading while checking authentication
-  if (isChecking) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-mm-bg via-white to-mm-primary/5">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-mm-primary border-t-transparent mx-auto mb-4"></div>
-          <p className="text-mm-ink font-semibold">Loading...</p>
-        </div>
-      </div>
-    );
-  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

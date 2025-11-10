@@ -78,6 +78,13 @@ async function apiRequest<T = any>(
   try {
     const token = getAuthToken();
     
+    console.log('🔐 API Request:', { 
+      endpoint, 
+      method: options.method || 'GET',
+      hasToken: !!token,
+      tokenPreview: token ? `${token.substring(0, 20)}...` : 'NO TOKEN'
+    });
+    
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
@@ -96,6 +103,13 @@ async function apiRequest<T = any>(
     });
 
     const data = await response.json();
+
+    console.log('📥 API Response:', {
+      endpoint,
+      status: response.status,
+      ok: response.ok,
+      data
+    });
 
     if (!response.ok) {
       return {
@@ -250,8 +264,62 @@ export async function updateMissionRepresentativeStatus(
   });
 }
 
+/**
+ * Update mission representative details
+ */
+export async function updateMissionRepresentative(
+  id: string,
+  data: Partial<{
+    fullName: string;
+    email: string;
+    contactNumber: string;
+    gender: string;
+    dateOfBirth: string;
+    province: string;
+    district: string;
+    constituency: string;
+    municipality: string;
+    wardNumber: string;
+    currentAddress: string;
+    educationLevel: string;
+    institutionName?: string;
+    fieldOfStudy?: string;
+    positionInterested: string;
+    politicalExperience?: string;
+    keyIssues: string[];
+    whyJoin?: string;
+    notes?: string;
+  }>
+): Promise<ApiResponse> {
+  return apiRequest(`/api/mission-representatives/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * Soft delete (move to trash) mission representative
+ */
 export async function deleteMissionRepresentative(id: string): Promise<ApiResponse> {
   return apiRequest(`/api/mission-representatives/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+/**
+ * Restore mission representative from trash
+ */
+export async function restoreMissionRepresentative(id: string): Promise<ApiResponse> {
+  return apiRequest(`/api/mission-representatives/${id}/restore`, {
+    method: 'POST',
+  });
+}
+
+/**
+ * Permanently delete mission representative (superadmin only)
+ */
+export async function permanentlyDeleteMissionRepresentative(id: string): Promise<ApiResponse> {
+  return apiRequest(`/api/mission-representatives/${id}/permanent`, {
     method: 'DELETE',
   });
 }

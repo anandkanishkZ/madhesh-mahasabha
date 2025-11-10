@@ -30,6 +30,18 @@ export default function DashboardLayout({
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // CRITICAL FIX: Check if on login page immediately to prevent spinner
+  // Handle both /login and /login/ (with trailing slash)
+  const isLoginPage = pathname === '/login' || pathname === '/login/' || pathname?.endsWith('/login') || pathname?.endsWith('/login/');
+
+  // Debug logging (remove after fixing)
+  console.log('🔍 Layout Debug:', {
+    pathname,
+    isLoginPage,
+    isLoading,
+    timestamp: new Date().toISOString()
+  });
+
   // Navigation items
   const navItems = [
     {
@@ -59,17 +71,29 @@ export default function DashboardLayout({
   ];
 
   useEffect(() => {
+    // Skip authentication check for login page
+    if (isLoginPage) {
+      setIsLoading(false);
+      return;
+    }
+
+    // Check authentication for protected routes
     if (!isAuthenticated()) {
       router.replace('/login');
       return;
     }
 
-    const storedUser = localStorage.getItem('user');
+    // Load user data
+    const storedUser = localStorage.getItem('mm_user_data');
     if (storedUser) {
-      setUserData(JSON.parse(storedUser));
+      try {
+        setUserData(JSON.parse(storedUser));
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+      }
     }
     setIsLoading(false);
-  }, [router]);
+  }, [router, pathname, isLoginPage]);
 
   const handleLogout = () => {
     logout();
@@ -83,6 +107,13 @@ export default function DashboardLayout({
     return pathname.startsWith(href);
   };
 
+  // ⚡ CRITICAL FIX: Check login page FIRST before any loading state
+  // This prevents the spinner from showing on the login page
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
+
+  // Show loading spinner only for protected routes during authentication check
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -91,6 +122,7 @@ export default function DashboardLayout({
     );
   }
 
+  // If not authenticated and not on login page, don't render
   if (!isAuthenticated()) {
     return null;
   }

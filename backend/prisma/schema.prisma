@@ -85,10 +85,16 @@ model MissionRepresentative {
   reviewedBy            String?
   notes                 String?
   
+  // Soft Delete (Trash System)
+  isDeleted             Boolean   @default(false)
+  deletedAt             DateTime?
+  deletedBy             String?
+  
   @@map("mission_representatives")
   @@index([email])
   @@index([status])
   @@index([district])
+  @@index([isDeleted])
 }
 
 // Contact Messages
@@ -105,9 +111,15 @@ model ContactMessage {
   respondedAt   DateTime?
   response      String?  @db.Text
   
+  // Soft Delete
+  isDeleted     Boolean  @default(false)
+  deletedAt     DateTime?
+  deletedBy     String?
+  
   @@map("contact_messages")
   @@index([status])
   @@index([createdAt])
+  @@index([isDeleted])
 }
 
 // Membership Applications
@@ -126,9 +138,15 @@ model Membership {
   reviewedAt    DateTime?
   reviewedBy    String?
   
+  // Soft Delete
+  isDeleted     Boolean  @default(false)
+  deletedAt     DateTime?
+  deletedBy     String?
+  
   @@map("memberships")
   @@index([email])
   @@index([status])
+  @@index([isDeleted])
 }
 
 // News/Updates

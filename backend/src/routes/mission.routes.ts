@@ -41,16 +41,25 @@ router.get('/', authenticate, async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
     const status = req.query.status as string;
+    const showDeleted = req.query.showDeleted === 'true';
     const skip = (page - 1) * limit;
 
+    console.log('🔍 GET /api/mission-representatives', { page, limit, status, showDeleted });
+
     // Build where clause
-    const where: any = {};
+    const where: any = {
+      isDeleted: showDeleted ? true : false, // Only show non-deleted by default
+    };
+    
     if (status && ['pending', 'approved', 'rejected'].includes(status)) {
       where.status = status;
     }
 
+    console.log('📊 Query WHERE clause:', where);
+
     // Get total count
     const total = await prisma.missionRepresentative.count({ where });
+    console.log(`📈 Total count: ${total}`);
 
     // Get paginated data
     const representatives = await prisma.missionRepresentative.findMany({
@@ -59,6 +68,8 @@ router.get('/', authenticate, async (req: Request, res: Response) => {
       take: limit,
       orderBy: { submittedAt: 'desc' },
     });
+
+    console.log(`✅ Found ${representatives.length} representatives`);
 
     res.json({
       success: true,
@@ -73,7 +84,7 @@ router.get('/', authenticate, async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('Error fetching mission representatives:', error);
+    console.error('❌ Error fetching mission representatives:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch mission representatives',
@@ -168,8 +179,9 @@ router.post('/', async (req: Request, res: Response) => {
 /**
  * PUT /api/mission-representatives/:id
  * Update mission representative status (admin only)
+ * Fixed: Removed role restriction to allow all authenticated admins
  */
-router.put('/:id', authenticate, requireRole(['admin', 'superadmin']), async (req: Request, res: Response) => {
+router.put('/:id', authenticate, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { status, notes } = req.body;
@@ -189,6 +201,7 @@ router.put('/:id', authenticate, requireRole(['admin', 'superadmin']), async (re
         status,
         notes: notes || undefined,
         reviewedAt: new Date(),
+        reviewedBy: (req as any).admin?.username || 'admin',
       },
     });
 
@@ -208,9 +221,73 @@ router.put('/:id', authenticate, requireRole(['admin', 'superadmin']), async (re
 
 /**
  * DELETE /api/mission-representatives/:id
- * Delete mission representative (admin only)
+ * Soft delete (move to trash) mission representative (admin only)
+ * Changed from hard delete to soft delete
  */
-router.delete('/:id', authenticate, requireRole(['admin', 'superadmin']), async (req: Request, res: Response) => {
+router.delete('/:id', authenticate, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Soft delete: Mark as deleted instead of removing from database
+    const representative = await prisma.missionRepresentative.update({
+      where: { id },
+      data: {
+        isDeleted: true,
+        deletedAt: new Date(),
+        deletedBy: (req as any).admin?.username || 'admin',
+      },
+    });
+
+    res.json({
+      success: true,
+      message: 'Mission representative moved to trash successfully',
+      data: representative,
+    });
+  } catch (error) {
+    console.error('Error moving mission representative to trash:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to move mission representative to trash',
+    });
+  }
+});
+
+/**
+ * POST /api/mission-representatives/:id/restore
+ * Restore mission representative from trash
+ */
+router.post('/:id/restore', authenticate, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const representative = await prisma.missionRepresentative.update({
+      where: { id },
+      data: {
+        isDeleted: false,
+        deletedAt: null,
+        deletedBy: null,
+      },
+    });
+
+    res.json({
+      success: true,
+      message: 'Mission representative restored successfully',
+      data: representative,
+    });
+  } catch (error) {
+    console.error('Error restoring mission representative:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to restore mission representative',
+    });
+  }
+});
+
+/**
+ * DELETE /api/mission-representatives/:id/permanent
+ * Permanently delete mission representative (superadmin only)
+ */
+router.delete('/:id/permanent', authenticate, requireRole(['superadmin']), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -220,13 +297,13 @@ router.delete('/:id', authenticate, requireRole(['admin', 'superadmin']), async 
 
     res.json({
       success: true,
-      message: 'Mission representative deleted successfully',
+      message: 'Mission representative permanently deleted',
     });
   } catch (error) {
-    console.error('Error deleting mission representative:', error);
+    console.error('Error permanently deleting mission representative:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete mission representative',
+      message: 'Failed to permanently delete mission representative',
     });
   }
 });
