@@ -1,37 +1,48 @@
-﻿'use client';
+'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  getMissionRepresentatives,
-  updateMissionRepresentativeStatus,
-  deleteMissionRepresentative,
-  fetchAuthenticatedFile,
-  isAuthenticated
-} from '@/lib/api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import AuthenticatedImage from '@/components/AuthenticatedImage';
 import {
   Users,
+  Eye,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Search,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
   Mail,
   Phone,
   MapPin,
   Calendar,
-  Eye,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  CheckCircle,
-  XCircle,
-  Clock,
   GraduationCap,
   Target,
+  BarChart3,
   FileText,
-  ExternalLink,
+  MessageSquare,
+  Settings,
+  LogOut,
+  Bell,
+  Menu,
+  X,
+  ExternalLink
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  getMissionRepresentatives,
+  updateMissionRepresentativeStatus,
+  deleteMissionRepresentative,
+  isAuthenticated,
+  logout,
+  getAuthenticatedFileUrl,
+  fetchAuthenticatedFile
+} from '@/lib/api';
 
 interface MissionRepresentative {
   id: string;
@@ -71,6 +82,8 @@ export default function MissionRepresentativesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedRep, setSelectedRep] = useState<MissionRepresentative | null>(null);
   const [showDetail, setShowDetail] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -78,8 +91,23 @@ export default function MissionRepresentativesPage() {
       return;
     }
 
+    // Get user data
+    const storedUserData = localStorage.getItem('mm_user_data');
+    if (storedUserData) {
+      try {
+        setUserData(JSON.parse(storedUserData));
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+      }
+    }
+
     fetchRepresentatives();
   }, [currentPage, selectedStatus, router]);
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace('/login');
+  };
 
   const fetchRepresentatives = async () => {
     setIsLoading(true);
@@ -155,19 +183,139 @@ export default function MissionRepresentativesPage() {
     rep.district.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Detail View
   if (showDetail && selectedRep) {
     return (
-      <div className="space-y-6">
-        <div className="max-w-4xl mx-auto">
-          <Button
-            onClick={() => setShowDetail(false)}
-            variant="outline"
-            className="mb-4"
-          >
-            <ChevronLeft className="w-4 h-4 mr-2" />
-            Back to List
-          </Button>
+      <div className="min-h-screen bg-mm-bg/30">
+        {/* Header */}
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+          <div className="px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                  className="lg:hidden p-2 rounded-md hover:bg-mm-bg transition-colors"
+                >
+                  {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                </button>
+                <h1 className="text-xl font-bold text-mm-primary">
+                  Madhesh Mahasabha Dashboard
+                </h1>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <button className="relative p-2 rounded-full hover:bg-mm-bg transition-colors">
+                  <Bell className="w-5 h-5 text-mm-ink" />
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-mm-accent rounded-full"></span>
+                </button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open('/', '_blank')}
+                  className="hidden md:flex"
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Visit Site
+                </Button>
+
+                {userData && (
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      <AvatarFallback className="bg-mm-primary text-white font-semibold">
+                        {userData.name?.charAt(0) || 'A'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="hidden sm:block">
+                      <p className="text-sm font-semibold text-mm-ink">{userData.name}</p>
+                      <p className="text-xs text-muted-foreground">{userData.role}</p>
+                    </div>
+                  </div>
+                )}
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="hidden sm:flex"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </Button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="flex">
+          {/* Sidebar */}
+          <aside className={`
+            fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 z-30
+            transition-transform duration-300 w-64
+            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          `}>
+            <nav className="p-4 space-y-2">
+              <a href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-mm-bg transition-colors text-mm-ink">
+                <BarChart3 className="w-5 h-5" />
+                <span>Dashboard</span>
+              </a>
+              <a href="/dashboard/mission-representatives" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-mm-primary/10 text-mm-primary font-semibold">
+                <Target className="w-5 h-5" />
+                <span>Mission Representatives</span>
+              </a>
+              <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-mm-bg transition-colors text-mm-ink">
+                <Users className="w-5 h-5" />
+                <span>Members</span>
+              </a>
+              <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-mm-bg transition-colors text-mm-ink">
+                <FileText className="w-5 h-5" />
+                <span>Posts</span>
+              </a>
+              <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-mm-bg transition-colors text-mm-ink">
+                <MessageSquare className="w-5 h-5" />
+                <span>Messages</span>
+              </a>
+              <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-mm-bg transition-colors text-mm-ink">
+                <Calendar className="w-5 h-5" />
+                <span>Events</span>
+              </a>
+              <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-mm-bg transition-colors text-mm-ink">
+                <Settings className="w-5 h-5" />
+                <span>Settings</span>
+              </a>
+
+              <div className="pt-4 lg:hidden">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="w-full"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </Button>
+              </div>
+            </nav>
+          </aside>
+
+          {/* Mobile overlay */}
+          {isSidebarOpen && (
+            <div
+              className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+              onClick={() => setIsSidebarOpen(false)}
+            />
+          )}
+
+          {/* Main Content - Detail View */}
+          <main className="flex-1 p-6">
+            <div className="max-w-4xl mx-auto">
+              <Button
+                onClick={() => setShowDetail(false)}
+                variant="outline"
+                className="mb-4"
+              >
+                <ChevronLeft className="w-4 h-4 mr-2" />
+                Back to List
+              </Button>
 
           <Card>
             <CardHeader>
@@ -313,7 +461,7 @@ export default function MissionRepresentativesPage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pl-7">
                     {selectedRep.photoUrl ? (
                       <div className="border rounded-lg p-4 bg-white shadow-sm">
-                        <p className="text-sm font-semibold text-gray-700 mb-3"> Photo</p>
+                        <p className="text-sm font-semibold text-gray-700 mb-3">📸 Photo</p>
                         <button
                           onClick={async () => {
                             if (!selectedRep.photoUrl) return;
@@ -351,7 +499,7 @@ export default function MissionRepresentativesPage() {
                       </div>
                     ) : (
                       <div className="border border-dashed rounded-lg p-4 bg-gray-50">
-                        <p className="text-sm font-semibold text-gray-700 mb-3"> Photo</p>
+                        <p className="text-sm font-semibold text-gray-700 mb-3">📸 Photo</p>
                         <div className="flex items-center justify-center h-48 bg-gray-100 rounded-md mb-3">
                           <p className="text-gray-400 text-sm">No photo uploaded</p>
                         </div>
@@ -360,7 +508,7 @@ export default function MissionRepresentativesPage() {
                     
                     {selectedRep.citizenshipUrl ? (
                       <div className="border rounded-lg p-4 bg-white shadow-sm">
-                        <p className="text-sm font-semibold text-gray-700 mb-3"> Citizenship</p>
+                        <p className="text-sm font-semibold text-gray-700 mb-3">🪪 Citizenship</p>
                         {selectedRep.citizenshipUrl.endsWith('.pdf') ? (
                           <button
                             onClick={async () => {
@@ -420,7 +568,7 @@ export default function MissionRepresentativesPage() {
                       </div>
                     ) : (
                       <div className="border border-dashed rounded-lg p-4 bg-gray-50">
-                        <p className="text-sm font-semibold text-gray-700 mb-3"> Citizenship</p>
+                        <p className="text-sm font-semibold text-gray-700 mb-3">🪪 Citizenship</p>
                         <div className="flex items-center justify-center h-48 bg-gray-100 rounded-md mb-3">
                           <p className="text-gray-400 text-sm">No document uploaded</p>
                         </div>
@@ -429,7 +577,7 @@ export default function MissionRepresentativesPage() {
                     
                     {selectedRep.educationCertUrl ? (
                       <div className="border rounded-lg p-4 bg-white shadow-sm">
-                        <p className="text-sm font-semibold text-gray-700 mb-3"> Education Certificate</p>
+                        <p className="text-sm font-semibold text-gray-700 mb-3">🎓 Education Certificate</p>
                         {selectedRep.educationCertUrl.endsWith('.pdf') ? (
                           <button
                             onClick={async () => {
@@ -489,7 +637,7 @@ export default function MissionRepresentativesPage() {
                       </div>
                     ) : (
                       <div className="border border-dashed rounded-lg p-4 bg-gray-50">
-                        <p className="text-sm font-semibold text-gray-700 mb-3"> Education Certificate</p>
+                        <p className="text-sm font-semibold text-gray-700 mb-3">🎓 Education Certificate</p>
                         <div className="flex items-center justify-center h-48 bg-gray-100 rounded-md mb-3">
                           <p className="text-gray-400 text-sm">No document uploaded</p>
                         </div>
@@ -500,7 +648,7 @@ export default function MissionRepresentativesPage() {
                   <div className="pl-7">
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                       <p className="text-sm text-yellow-800">
-                         No documents were uploaded with this application.
+                        ⚠️ No documents were uploaded with this application.
                       </p>
                     </div>
                   </div>
@@ -548,14 +696,136 @@ export default function MissionRepresentativesPage() {
               </div>
             </CardContent>
           </Card>
+            </div>
+          </main>
         </div>
       </div>
     );
   }
 
-  // List View
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-mm-bg/30">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div className="px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="lg:hidden p-2 rounded-md hover:bg-mm-bg transition-colors"
+              >
+                {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+              <h1 className="text-xl font-bold text-mm-primary">
+                Madhesh Mahasabha Dashboard
+              </h1>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <button className="relative p-2 rounded-full hover:bg-mm-bg transition-colors">
+                <Bell className="w-5 h-5 text-mm-ink" />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-mm-accent rounded-full"></span>
+              </button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open('/', '_blank')}
+                className="hidden md:flex"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Visit Site
+              </Button>
+
+              {userData && (
+                <div className="flex items-center gap-3">
+                  <Avatar>
+                    <AvatarFallback className="bg-mm-primary text-white font-semibold">
+                      {userData.name?.charAt(0) || 'A'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="hidden sm:block">
+                    <p className="text-sm font-semibold text-mm-ink">{userData.name}</p>
+                    <p className="text-xs text-muted-foreground">{userData.role}</p>
+                  </div>
+                </div>
+              )}
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="hidden sm:flex"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="flex">
+        {/* Sidebar */}
+        <aside className={`
+          fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 z-30
+          transition-transform duration-300 w-64
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}>
+          <nav className="p-4 space-y-2">
+            <a href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-mm-bg transition-colors text-mm-ink">
+              <BarChart3 className="w-5 h-5" />
+              <span>Dashboard</span>
+            </a>
+            <a href="/dashboard/mission-representatives" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-mm-primary/10 text-mm-primary font-semibold">
+              <Target className="w-5 h-5" />
+              <span>Mission Representatives</span>
+            </a>
+            <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-mm-bg transition-colors text-mm-ink">
+              <Users className="w-5 h-5" />
+              <span>Members</span>
+            </a>
+            <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-mm-bg transition-colors text-mm-ink">
+              <FileText className="w-5 h-5" />
+              <span>Posts</span>
+            </a>
+            <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-mm-bg transition-colors text-mm-ink">
+              <MessageSquare className="w-5 h-5" />
+              <span>Messages</span>
+            </a>
+            <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-mm-bg transition-colors text-mm-ink">
+              <Calendar className="w-5 h-5" />
+              <span>Events</span>
+            </a>
+            <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-mm-bg transition-colors text-mm-ink">
+              <Settings className="w-5 h-5" />
+              <span>Settings</span>
+            </a>
+
+            <div className="pt-4 lg:hidden">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                className="w-full"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </nav>
+        </aside>
+
+        {/* Mobile overlay */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
+        {/* Main Content */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Mission Representatives</h1>
@@ -691,6 +961,8 @@ export default function MissionRepresentativesPage() {
             </Button>
           </div>
         )}
+      </div>
+        </main>
       </div>
     </div>
   );

@@ -340,3 +340,110 @@ export async function fetchAuthenticatedFile(filePath: string): Promise<string |
   }
 }
 
+/**
+ * Contact Message APIs
+ */
+
+interface ContactMessageData {
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+  organization?: string;
+}
+
+interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+  organization?: string;
+  status: 'unread' | 'read' | 'responded';
+  createdAt: string;
+  respondedAt?: string;
+  response?: string;
+}
+
+interface ContactStats {
+  total: number;
+  unread: number;
+  read: number;
+  responded: number;
+}
+
+/**
+ * Submit contact message (public endpoint)
+ */
+export async function submitContactMessage(data: ContactMessageData): Promise<ApiResponse> {
+  return apiRequest('/api/contact', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * Get all contact messages with pagination (authenticated)
+ */
+export async function getContactMessages(page = 1, limit = 20, status?: string): Promise<ApiResponse<{
+  messages: ContactMessage[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}>> {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+  });
+  if (status) params.append('status', status);
+  
+  return apiRequest(`/api/contact?${params.toString()}`, {
+    method: 'GET',
+  });
+}
+
+/**
+ * Get contact message statistics (authenticated)
+ */
+export async function getContactStats(): Promise<ApiResponse<ContactStats>> {
+  return apiRequest('/api/contact/stats', {
+    method: 'GET',
+  });
+}
+
+/**
+ * Get contact message by ID (authenticated)
+ */
+export async function getContactMessageById(id: string): Promise<ApiResponse<ContactMessage>> {
+  return apiRequest(`/api/contact/${id}`, {
+    method: 'GET',
+  });
+}
+
+/**
+ * Update contact message status (authenticated)
+ */
+export async function updateContactMessageStatus(
+  id: string,
+  status: 'unread' | 'read' | 'responded',
+  response?: string
+): Promise<ApiResponse> {
+  return apiRequest(`/api/contact/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({ status, response }),
+  });
+}
+
+/**
+ * Delete contact message (admin only)
+ */
+export async function deleteContactMessage(id: string): Promise<ApiResponse> {
+  return apiRequest(`/api/contact/${id}`, {
+    method: 'DELETE',
+  });
+}

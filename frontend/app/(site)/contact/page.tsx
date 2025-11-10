@@ -21,10 +21,17 @@ import {
   HelpCircle,
   ChevronDown
 } from 'lucide-react';
-import { submitContactForm, type ContactFormData } from '@/lib/firebaseService';
+import { submitContactMessage } from '@/lib/api';
 import Link from 'next/link';
 
-interface FormData extends ContactFormData {}
+interface FormData {
+  name: string;
+  email: string;
+  phone: string;
+  subject: string;
+  message: string;
+  organization: string;
+}
 
 interface FormErrors {
   [key: string]: string;
@@ -113,22 +120,22 @@ export default function Contact() {
     setSubmitError(null);
 
     try {
-      // Prepare data for Firebase submission
-      const submissionData: ContactFormData = {
+      // Prepare data for backend API submission
+      const submissionData = {
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
-        phone: formData.phone ? formData.phone.replace(/[\s\-\+\(\)]/g, '') : '',
+        phone: formData.phone ? formData.phone.replace(/[\s\-\+\(\)]/g, '') : undefined,
         subject: formData.subject.trim(),
         message: formData.message.trim(),
-        organization: formData.organization ? formData.organization.trim() : '',
+        organization: formData.organization ? formData.organization.trim() : undefined,
       };
 
-      console.log('Submitting contact form data:', submissionData);
+      console.log('Submitting contact form data to backend API:', submissionData);
 
-      const result = await submitContactForm(submissionData);
+      const result = await submitContactMessage(submissionData);
 
       if (result.success) {
-        console.log('Contact form submitted successfully with ID:', result.id);
+        console.log('Contact form submitted successfully:', result.data);
         setIsSubmitted(true);
         
         // Reset form
