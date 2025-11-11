@@ -19,7 +19,9 @@ import {
   Sparkles,
   ArrowRight,
   HelpCircle,
-  ChevronDown
+  ChevronDown,
+  BadgeCheck,
+  CircleCheckBig
 } from 'lucide-react';
 import { submitContactMessage } from '@/lib/api';
 import Link from 'next/link';
@@ -168,65 +170,138 @@ export default function Contact() {
   if (isSubmitted) {
     return (
       <>
-        <main id="main-content" className="min-h-screen flex items-center justify-center bg-green-50 relative overflow-hidden">
-          {/* Animated background circles */}
-          <div className="absolute top-20 left-20 w-72 h-72 bg-green-200/30 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-mm-primary/20 rounded-full blur-3xl animate-pulse delay-700"></div>
+        <main id="main-content" className="min-h-screen flex items-center justify-center bg-gradient-to-br from-mm-primary/5 via-white to-mm-accent/5 relative overflow-hidden">
+          {/* Professional background elements */}
+          <div className="absolute top-0 left-0 w-full h-full">
+            <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-br from-mm-primary/10 to-transparent rounded-full blur-3xl"></div>
+            <div className="absolute bottom-20 right-20 w-[500px] h-[500px] bg-gradient-to-tl from-mm-accent/10 to-transparent rounded-full blur-3xl"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-mm-primary/5 to-mm-accent/5 rounded-full blur-3xl"></div>
+          </div>
           
-          <div className="max-w-2xl mx-auto text-center px-4 relative z-10">
-            {/* Success Icon with animation */}
-            <div className="relative inline-block mb-8">
-              <div className="w-32 h-32 bg-green-500 rounded-full flex items-center justify-center mx-auto shadow-2xl animate-bounce">
-                <CheckCircle className="w-16 h-16 text-white" strokeWidth={3} />
+          <div className="max-w-3xl mx-auto text-center px-4 py-8 relative z-10">
+            {/* Success Icon with professional animation */}
+            <div className="relative inline-block mb-10">
+              <div className="w-28 h-28 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-green-500/30 relative">
+                <Send className="w-14 h-14 text-white" strokeWidth={2} />
+                
+                {/* Subtle pulse ring */}
+                <div className="absolute inset-0 rounded-full border-4 border-green-400 animate-ping opacity-20"></div>
               </div>
-              {/* Decorative rings */}
-              <div className="absolute inset-0 w-32 h-32 bg-green-300 rounded-full animate-ping opacity-20"></div>
-              <div className="absolute -top-2 -right-2">
-                <Sparkles className="w-8 h-8 text-yellow-400 animate-pulse" />
-              </div>
-              <div className="absolute -bottom-2 -left-2">
-                <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse delay-500" />
-              </div>
+              
+              {/* Professional corner accents */}
+              <div className="absolute -top-3 -right-3 w-6 h-6 bg-mm-primary rounded-full shadow-lg"></div>
+              <div className="absolute -bottom-3 -left-3 w-4 h-4 bg-mm-accent rounded-full shadow-lg"></div>
             </div>
             
-            <h1 className="nepali-heading text-4xl lg:text-5xl font-bold text-mm-ink mb-6">
+            {/* Heading */}
+            <h1 className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-mm-ink to-mm-primary bg-clip-text text-transparent mb-6" style={{ fontFamily: 'Khand, sans-serif' }}>
               धन्यवाद!
             </h1>
             
-            <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200 mb-8">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            {/* Main success card */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-10 shadow-2xl border border-gray-100 mb-10">
+              {/* Success indicator */}
+              <div className="w-16 h-16 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-green-200">
                 <Send className="w-8 h-8 text-green-600" />
               </div>
               
-              <p className="nepali-text text-xl text-gray-700 mb-4">
-                तपाईंको संदेश सफलतापूर्वक पठाइयो।
-              </p>
-              
-              <p className="nepali-text text-lg text-gray-600 mb-6">
-                हामी छिट्टै तपाईंलाई जवाफ दिनेछौं।
-              </p>
-              
-              <div className="bg-mm-primary/5 rounded-xl p-4 border border-mm-primary/20 mb-6">
-                <p className="nepali-text text-sm text-mm-primary font-semibold">
-                  📧 यदि इमेल एप्लिकेसन खुलेन भने, mahasabhamadhesh@gmail.com मा सिधै इमेल पठाउनुहोस्।
+              <div className="space-y-4 mb-8">
+                <p className="nepali-text text-2xl text-mm-ink font-semibold">
+                  तपाईंको संदेश सफलतापूर्वक पठाइयो।
                 </p>
+                
+                <p className="nepali-text text-lg text-gray-600 leading-relaxed">
+                  हामी छिट्टै तपाईंलाई जवाफ दिनेछौं।
+                </p>
+              </div>
+              
+              {/* Information box */}
+              <div className="bg-gradient-to-r from-mm-primary/5 to-mm-accent/5 rounded-2xl p-6 border border-mm-primary/10">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-10 h-10 bg-mm-primary rounded-lg flex items-center justify-center">
+                    <Mail className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="nepali-text text-sm text-gray-700 font-medium mb-1">
+                      सिधै सम्पर्कका लागि
+                    </p>
+                    <a 
+                      href="mailto:mahasabhamadhesh@gmail.com"
+                      className="text-mm-primary font-semibold hover:underline transition-all"
+                    >
+                      mahasabhamadhesh@gmail.com
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
             
+            {/* Next steps section */}
+            <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-gray-100">
+              <h2 className="nepali-heading text-lg font-semibold text-mm-ink mb-4">
+                अर्को चरण
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                <div className="flex flex-col items-center">
+                  <div className="w-10 h-10 bg-mm-primary/10 rounded-full flex items-center justify-center mb-2">
+                    <span className="text-mm-primary font-bold">1</span>
+                  </div>
+                  <p className="nepali-text text-gray-600 text-center">संदेश प्राप्त भयो</p>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="w-10 h-10 bg-mm-primary/10 rounded-full flex items-center justify-center mb-2">
+                    <span className="text-mm-primary font-bold">2</span>
+                  </div>
+                  <p className="nepali-text text-gray-600 text-center">समीक्षा हुँदैछ</p>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="w-10 h-10 bg-mm-primary/10 rounded-full flex items-center justify-center mb-2">
+                    <span className="text-mm-primary font-bold">3</span>
+                  </div>
+                  <p className="nepali-text text-gray-600 text-center">चाँडै जवाफ आउँदैछ</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Action buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 onClick={() => setIsSubmitted(false)} 
-                className="bg-mm-primary hover:bg-mm-primary/90 text-white px-8 py-4 text-lg"
+                className="bg-gradient-to-r from-mm-primary to-mm-primary/90 hover:from-mm-primary/90 hover:to-mm-primary text-white px-8 py-6 text-lg shadow-lg shadow-mm-primary/20 transition-all hover:shadow-xl hover:shadow-mm-primary/30 group"
               >
-                अर्को संदेश पठाउनुहोस्
+                <span className="nepali-text">अर्को संदेश पठाउनुहोस्</span>
+                <ArrowRight className="inline-block ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button 
                 variant="outline" 
-                className="px-8 py-4 text-lg border-2"
+                className="px-8 py-6 text-lg border-2 border-gray-300 hover:border-mm-primary hover:bg-mm-primary/5 transition-all nepali-text"
                 asChild
               >
                 <Link href="/">गृहपृष्ठमा फर्किनुहोस्</Link>
               </Button>
+            </div>
+            
+            {/* Social media reminder */}
+            <div className="mt-10 pt-8 border-t border-gray-200">
+              <p className="nepali-text text-sm text-gray-500 mb-3">हामीलाई सामाजिक सञ्जालमा पनि फलो गर्नुहोस्</p>
+              <div className="flex gap-3 justify-center">
+                <a 
+                  href="https://facebook.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-gray-100 hover:bg-blue-600 rounded-full flex items-center justify-center transition-all group"
+                >
+                  <Facebook className="w-5 h-5 text-gray-600 group-hover:text-white transition-colors" />
+                </a>
+                <a 
+                  href="https://youtube.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-gray-100 hover:bg-red-600 rounded-full flex items-center justify-center transition-all group"
+                >
+                  <Youtube className="w-5 h-5 text-gray-600 group-hover:text-white transition-colors" />
+                </a>
+              </div>
             </div>
           </div>
         </main>

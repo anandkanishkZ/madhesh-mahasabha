@@ -147,6 +147,16 @@ router.post('/', async (req: Request, res: Response) => {
     // Validate input
     const validatedData = contactMessageSchema.parse(req.body);
 
+    // Get IP address (handle proxies and direct connections)
+    const ipAddress = (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() 
+                      || req.headers['x-real-ip'] as string
+                      || req.socket.remoteAddress 
+                      || req.ip 
+                      || 'Unknown';
+
+    // Get user agent
+    const userAgent = req.get('user-agent') || 'Unknown';
+
     // Create contact message
     const message = await prisma.contactMessage.create({
       data: {
@@ -156,6 +166,8 @@ router.post('/', async (req: Request, res: Response) => {
         subject: validatedData.subject,
         message: validatedData.message,
         organization: validatedData.organization || null,
+        ipAddress: ipAddress,
+        userAgent: userAgent,
         status: 'unread',
       },
     });
@@ -166,9 +178,9 @@ router.post('/', async (req: Request, res: Response) => {
         action: 'create',
         entity: 'contact_message',
         entityId: message.id,
-        details: `New contact message from ${validatedData.name} (${validatedData.email})`,
-        ipAddress: req.ip,
-        userAgent: req.get('user-agent'),
+        details: `New contact message from ${validatedData.name} (${validatedData.email}) - IP: ${ipAddress}`,
+        ipAddress: ipAddress,
+        userAgent: userAgent,
       },
     });
 

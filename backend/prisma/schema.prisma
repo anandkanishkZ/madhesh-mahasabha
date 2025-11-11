@@ -107,6 +107,8 @@ model ContactMessage {
   message       String   @db.Text
   organization  String?
   status        String   @default("unread") // unread, read, responded
+  ipAddress     String?  // User's IP address when submitting
+  userAgent     String?  // User's browser/device info
   createdAt     DateTime @default(now())
   respondedAt   DateTime?
   response      String?  @db.Text
