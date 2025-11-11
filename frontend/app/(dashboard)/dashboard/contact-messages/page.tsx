@@ -529,21 +529,21 @@ export default function ContactMessagesPage() {
           )}
         </div>
 
-      {/* Professional 2-Column Message Details Modal */}
+      {/* Professional 2-Column Message Details Modal - Optimized Sizing */}
       {showDetail && selectedMessage && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl sm:rounded-3xl w-full h-[96vh] sm:h-[92vh] max-w-[98vw] sm:max-w-6xl lg:max-w-7xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in duration-300">
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-3 md:p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl sm:rounded-2xl w-full h-[98vh] sm:h-[95vh] md:h-[90vh] max-w-[99vw] sm:max-w-5xl md:max-w-6xl lg:max-w-7xl shadow-2xl flex flex-col animate-in zoom-in duration-300 overflow-hidden">
             
-            {/* Modal Header */}
-            <div className="relative bg-gradient-to-r from-mm-primary via-mm-primary/95 to-mm-primary/90 px-4 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between flex-shrink-0">
+            {/* Modal Header - Fixed */}
+            <div className="relative bg-gradient-to-r from-mm-primary via-mm-primary/95 to-mm-primary/90 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-3.5 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm ring-2 ring-white/40 shadow-lg flex-shrink-0">
-                  <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm ring-2 ring-white/40 shadow-lg flex-shrink-0">
+                  <Mail className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white truncate">Message Details</h2>
-                  <p className="text-white/95 text-xs sm:text-sm flex items-center gap-2 truncate mt-0.5">
-                    <User className="w-3.5 h-3.5 flex-shrink-0" />
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white truncate">Message Details</h2>
+                  <p className="text-white/95 text-[10px] sm:text-xs md:text-sm flex items-center gap-2 truncate mt-0.5">
+                    <User className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
                     <span className="truncate font-medium">{selectedMessage.name}</span>
                   </p>
                 </div>
@@ -553,81 +553,83 @@ export default function ContactMessagesPage() {
                 {getStatusBadge(selectedMessage.status)}
                 <button
                   onClick={() => setShowDetail(false)}
-                  className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-white/10 hover:bg-white/25 rounded-xl transition-all duration-200 group flex-shrink-0 border border-white/20"
+                  className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 flex items-center justify-center bg-white/10 hover:bg-white/25 rounded-xl transition-all duration-200 group flex-shrink-0 border border-white/20"
                   aria-label="Close modal"
                 >
-                  <X className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
+                  <X className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:scale-110 transition-transform" />
                 </button>
               </div>
 
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
             </div>
 
-            {/* 2-Column Content Layout */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0 bg-gradient-to-br from-gray-50 to-gray-100/50">
-              <div className="p-3 sm:p-4 md:p-5 lg:p-6">
+            {/* Scrollable Content Area with VISIBLE Scrollbar */}
+            <div 
+              className="flex-1 overflow-y-auto custom-scrollbar bg-gradient-to-br from-gray-50 to-gray-100/50 min-h-0"
+            >
+              <div className="p-2 sm:p-3 md:p-4 lg:p-5 max-w-full overflow-x-hidden">
                 
                 {/* Status & Date Banner */}
-                <div className="flex items-center justify-between gap-3 bg-white rounded-xl p-3 sm:p-3.5 border border-gray-200 shadow-sm mb-3 sm:mb-4">
-                  <div className="flex items-center gap-2 text-xs sm:text-sm">
-                    <Calendar className="w-4 h-4 text-gray-500" />
+                <div className="flex items-center justify-between gap-2 sm:gap-3 bg-white rounded-lg sm:rounded-xl p-2 sm:p-2.5 md:p-3 border border-gray-200 shadow-sm mb-2 sm:mb-3 md:mb-4">
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs md:text-sm">
+                    <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-gray-500" />
                     <span className="font-semibold text-gray-700">Received:</span>
                     <span className="text-gray-600">{formatDate(selectedMessage.createdAt)}</span>
                   </div>
                 </div>
 
-                {/* Main 2-Column Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+                {/* Main 2-Column Grid - Proper Containment */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3 md:gap-4 lg:items-start max-w-full overflow-x-hidden">
                   
                   {/* LEFT COLUMN - Contact Information */}
-                  <div className="space-y-3 sm:space-y-4">
+                  <div className="space-y-2 sm:space-y-3 md:space-y-4 w-full min-w-0 max-w-full overflow-x-hidden">
                     
                     {/* Personal Details Card */}
-                    <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 border border-gray-200 shadow-sm">
-                      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
-                        <div className="w-8 h-8 bg-mm-primary/10 rounded-lg flex items-center justify-center">
-                          <User className="w-4 h-4 text-mm-primary" />
+                    <div className="bg-white rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-5 border border-gray-200 shadow-sm w-full max-w-full overflow-x-hidden">
+                      <div className="flex items-center gap-2 mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-gray-100">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 bg-mm-primary/10 rounded-lg flex items-center justify-center">
+                          <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-mm-primary" />
                         </div>
-                        <h3 className="font-bold text-gray-900 text-base sm:text-lg">Personal Details</h3>
+                        <h3 className="font-bold text-gray-900 text-sm sm:text-base md:text-lg">Personal Details</h3>
                       </div>
                       
-                      <div className="space-y-3">
+                      <div className="space-y-3 max-w-full overflow-x-hidden">
                         {/* Name */}
-                        <div>
+                        <div className="max-w-full overflow-x-hidden">
                           <label className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-1.5">Full Name</label>
-                          <p className="text-gray-900 font-semibold text-sm sm:text-base">{selectedMessage.name}</p>
+                          <p className="text-gray-900 font-semibold text-sm sm:text-base break-words">{selectedMessage.name}</p>
                         </div>
                         
                         {/* Email */}
-                        <div>
+                        <div className="max-w-full overflow-x-hidden">
                           <label className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-1.5">Email Address</label>
                           <a 
                             href={`mailto:${selectedMessage.email}`} 
-                            className="text-mm-primary hover:text-mm-primary/80 font-semibold text-sm sm:text-base hover:underline transition-colors inline-flex items-center gap-2 break-all"
+                            className="text-mm-primary hover:text-mm-primary/80 font-semibold text-sm sm:text-base hover:underline transition-colors inline-flex items-center gap-2 break-all max-w-full"
                           >
                             <Mail className="w-4 h-4 flex-shrink-0" />
-                            <span className="break-all">{selectedMessage.email}</span>
+                            <span className="break-all max-w-full">{selectedMessage.email}</span>
                           </a>
                         </div>
                         
                         {/* Phone */}
                         {selectedMessage.phone && (
-                          <div>
+                          <div className="max-w-full overflow-x-hidden">
                             <label className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-1.5">Phone Number</label>
-                            <p className="text-gray-900 font-semibold text-sm sm:text-base inline-flex items-center gap-2">
+                            <p className="text-gray-900 font-semibold text-sm sm:text-base inline-flex items-center gap-2 break-words">
                               <Phone className="w-4 h-4 text-mm-primary" />
-                              {selectedMessage.phone}
+                              <span className="break-words">{selectedMessage.phone}</span>
                             </p>
                           </div>
                         )}
                         
                         {/* Organization */}
                         {selectedMessage.organization && (
-                          <div>
+                          <div className="max-w-full overflow-x-hidden">
                             <label className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-1.5">Organization</label>
                             <p className="text-gray-900 font-semibold text-sm sm:text-base inline-flex items-start gap-2 break-words">
                               <Building2 className="w-4 h-4 text-mm-primary flex-shrink-0 mt-0.5" />
-                              <span className="break-words">{selectedMessage.organization}</span>
+                              <span className="break-words max-w-full">{selectedMessage.organization}</span>
                             </p>
                           </div>
                         )}
@@ -635,7 +637,7 @@ export default function ContactMessagesPage() {
                     </div>
 
                     {/* Technical Details Card */}
-                    <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-xl sm:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
+                    <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-xl sm:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm w-full max-w-full overflow-hidden">
                       <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-200">
                         <div className="w-8 h-8 bg-slate-600/10 rounded-lg flex items-center justify-center">
                           <Globe className="w-4 h-4 text-slate-600" />
@@ -643,34 +645,34 @@ export default function ContactMessagesPage() {
                         <h3 className="font-bold text-gray-900 text-base sm:text-lg">Technical Info</h3>
                       </div>
                       
-                      <div className="space-y-3">
+                      <div className="space-y-3 w-full max-w-full overflow-x-hidden">
                         {/* IP Address */}
                         {selectedMessage.ipAddress && (
-                          <div className="bg-white rounded-lg p-3 border border-slate-200">
+                          <div className="bg-white rounded-lg p-3 border border-slate-200 w-full max-w-full overflow-hidden">
                             <label className="text-[10px] font-extrabold text-blue-600 uppercase tracking-wider block mb-1.5 flex items-center gap-1.5">
                               <Globe className="w-3 h-3" />
                               IP Address
                             </label>
-                            <p className="text-gray-900 font-bold text-sm sm:text-base font-mono">{selectedMessage.ipAddress}</p>
+                            <p className="text-gray-900 font-bold text-sm sm:text-base font-mono break-all max-w-full overflow-x-hidden">{selectedMessage.ipAddress}</p>
                           </div>
                         )}
                         
                         {/* User Agent */}
                         {selectedMessage.userAgent && (
-                          <div className="bg-white rounded-lg p-3 border border-slate-200">
+                          <div className="bg-white rounded-lg p-3 border border-slate-200 w-full max-w-full overflow-hidden max-h-48 overflow-y-auto custom-scrollbar">
                             <label className="text-[10px] font-extrabold text-purple-600 uppercase tracking-wider block mb-1.5 flex items-center gap-1.5">
                               <Monitor className="w-3 h-3" />
                               Device / Browser
                             </label>
-                            <p className="text-gray-700 font-medium text-xs break-all leading-relaxed">{selectedMessage.userAgent}</p>
+                            <p className="text-gray-700 font-medium text-xs break-all leading-relaxed max-w-full overflow-x-hidden">{selectedMessage.userAgent}</p>
                           </div>
                         )}
                         
                         {/* Info Note */}
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5">
-                          <p className="text-[10px] text-blue-700 flex items-start gap-1.5">
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 w-full max-w-full overflow-x-hidden">
+                          <p className="text-[10px] text-blue-700 flex items-start gap-1.5 break-words">
                             <span className="text-blue-500 mt-0.5">ℹ️</span>
-                            <span>This information is collected for security and spam prevention purposes.</span>
+                            <span className="break-words max-w-full">This information is collected for security and spam prevention purposes.</span>
                           </p>
                         </div>
                       </div>
@@ -678,33 +680,33 @@ export default function ContactMessagesPage() {
                   </div>
 
                   {/* RIGHT COLUMN - Message Content */}
-                  <div className="space-y-3 sm:space-y-4">
+                  <div className="space-y-2 sm:space-y-3 md:space-y-4 w-full min-w-0 max-w-full overflow-x-hidden">
                     
                     {/* Subject Card */}
-                    <div className="bg-gradient-to-br from-mm-primary/5 via-mm-primary/10 to-mm-primary/5 rounded-xl sm:rounded-2xl p-4 sm:p-5 border-l-4 border-mm-primary shadow-sm">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="w-8 h-8 bg-mm-primary/20 rounded-lg flex items-center justify-center">
-                          <MessageSquare className="w-4 h-4 text-mm-primary" />
+                    <div className="bg-gradient-to-br from-mm-primary/5 via-mm-primary/10 to-mm-primary/5 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-5 border-l-4 border-mm-primary shadow-sm w-full max-w-full overflow-hidden">
+                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 bg-mm-primary/20 rounded-lg flex items-center justify-center">
+                          <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-mm-primary" />
                         </div>
-                        <label className="text-[10px] font-extrabold text-mm-primary uppercase tracking-wider">Subject</label>
+                        <label className="text-[9px] sm:text-[10px] font-extrabold text-mm-primary uppercase tracking-wider">Subject</label>
                       </div>
-                      <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-mm-primary leading-tight break-words">
+                      <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-mm-primary leading-tight break-words max-w-full overflow-x-hidden">
                         {selectedMessage.subject}
                       </h3>
                     </div>
                     
-                    {/* Message Card */}
-                    <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 border border-gray-200 shadow-sm flex-1">
-                      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
-                        <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                          <MessageSquare className="w-4 h-4 text-gray-600" />
+                    {/* Message Card - Scrollable */}
+                    <div className="bg-white rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-5 border border-gray-200 shadow-sm w-full max-w-full">
+                      <div className="flex items-center gap-2 mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-gray-100">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600" />
                         </div>
-                        <h3 className="font-bold text-gray-900 text-base sm:text-lg">Message Content</h3>
+                        <h3 className="font-bold text-gray-900 text-sm sm:text-base md:text-lg">Message Content</h3>
                       </div>
                       
-                      <div className="prose prose-sm sm:prose max-w-none">
-                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                          <p className="text-gray-800 leading-relaxed sm:leading-loose whitespace-pre-wrap text-sm sm:text-base break-words m-0">
+                      <div className="prose prose-sm sm:prose max-w-none w-full max-w-full">
+                        <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200 max-w-full max-h-[250px] sm:max-h-[300px] md:max-h-[350px] lg:max-h-[400px] overflow-y-auto custom-scrollbar">
+                          <p className="text-gray-800 leading-relaxed sm:leading-loose whitespace-pre-wrap text-xs sm:text-sm md:text-base break-words m-0 max-w-full overflow-x-hidden">
                             {selectedMessage.message}
                           </p>
                         </div>
@@ -712,23 +714,26 @@ export default function ContactMessagesPage() {
                     </div>
                   </div>
                 </div>
+                
+                {/* Bottom spacing for better scroll experience */}
+                <div className="h-3 sm:h-4 md:h-6"></div>
               </div>
             </div>
 
-            {/* Footer Actions */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-3.5 bg-white border-t-2 border-gray-200 flex-shrink-0 shadow-lg">
+            {/* Footer Actions - Fixed */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-3.5 bg-white border-t-2 border-gray-200 flex-shrink-0 shadow-lg">
               <div className="flex items-center justify-center sm:justify-start gap-2">
                 {selectedMessage.status === 'unread' ? (
                   <Button
                     onClick={() => handleMarkAsRead(selectedMessage.id)}
-                    className="bg-green-600 hover:bg-green-700 text-white shadow-md h-10 sm:h-11 px-5 sm:px-6 text-sm sm:text-base font-semibold w-full sm:w-auto transition-all"
+                    className="bg-green-600 hover:bg-green-700 text-white shadow-md h-9 sm:h-10 md:h-11 px-4 sm:px-5 md:px-6 text-xs sm:text-sm md:text-base font-semibold w-full sm:w-auto transition-all"
                   >
-                    <CheckCircle className="w-4 h-4 mr-2" />
+                    <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                     Mark as Read
                   </Button>
                 ) : (
-                  <div className="flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold text-green-700 bg-green-50 rounded-lg border-2 border-green-200 px-4 py-2.5 w-full sm:w-auto">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
+                  <div className="flex items-center justify-center gap-2 text-[10px] sm:text-xs md:text-sm font-semibold text-green-700 bg-green-50 rounded-lg border-2 border-green-200 px-3 sm:px-4 py-2 sm:py-2.5 w-full sm:w-auto">
+                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                     <span>Message Read</span>
                   </div>
                 )}
@@ -737,9 +742,9 @@ export default function ContactMessagesPage() {
               <Button
                 variant="outline"
                 onClick={() => handleDelete(selectedMessage.id)}
-                className="border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 font-semibold h-10 sm:h-11 px-5 sm:px-6 text-sm sm:text-base w-full sm:w-auto transition-all"
+                className="border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 font-semibold h-9 sm:h-10 md:h-11 px-4 sm:px-5 md:px-6 text-xs sm:text-sm md:text-base w-full sm:w-auto transition-all"
               >
-                <Trash2 className="w-4 h-4 mr-2" />
+                <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                 Delete Message
               </Button>
             </div>
