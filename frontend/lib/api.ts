@@ -515,3 +515,166 @@ export async function deleteContactMessage(id: string): Promise<ApiResponse> {
     method: 'DELETE',
   });
 }
+
+/**
+ * Membership APIs
+ */
+
+interface MembershipData {
+  fullName: string;
+  email: string;
+  phone: string;
+  address: string;
+  occupation?: string;
+  education?: string;
+  birthDate?: string;
+  gender?: string;
+  motivations?: string[];
+  skills?: string[];
+  availability?: string;
+  additionalInfo?: string;
+}
+
+interface Membership {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  address: string;
+  occupation?: string;
+  education?: string;
+  birthDate?: string;
+  gender?: string;
+  motivations: string[];
+  skills: string[];
+  availability?: string;
+  additionalInfo?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  ipAddress?: string;
+  userAgent?: string;
+  submittedAt: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
+  notes?: string;
+  isDeleted: boolean;
+  deletedAt?: string;
+  deletedBy?: string;
+}
+
+interface MembershipStats {
+  total: number;
+  pending: number;
+  approved: number;
+  rejected: number;
+}
+
+/**
+ * Submit membership application (public endpoint)
+ */
+export async function submitMembership(data: MembershipData): Promise<ApiResponse> {
+  return apiRequest('/api/memberships', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * Get all memberships with pagination (authenticated)
+ */
+export async function getMemberships(
+  page = 1, 
+  limit = 20, 
+  status?: string,
+  search?: string
+): Promise<ApiResponse<{
+  memberships: Membership[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}>> {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+  });
+  if (status) params.append('status', status);
+  if (search) params.append('search', search);
+  
+  return apiRequest(`/api/memberships?${params.toString()}`, {
+    method: 'GET',
+  });
+}
+
+/**
+ * Get membership statistics (authenticated)
+ */
+export async function getMembershipStats(): Promise<ApiResponse<MembershipStats>> {
+  return apiRequest('/api/memberships/stats', {
+    method: 'GET',
+  });
+}
+
+/**
+ * Get membership by ID (authenticated)
+ */
+export async function getMembershipById(id: string): Promise<ApiResponse<Membership>> {
+  return apiRequest(`/api/memberships/${id}`, {
+    method: 'GET',
+  });
+}
+
+/**
+ * Update membership status (admin only)
+ */
+export async function updateMembershipStatus(
+  id: string,
+  status: 'pending' | 'approved' | 'rejected',
+  notes?: string
+): Promise<ApiResponse> {
+  return apiRequest(`/api/memberships/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({ status, notes }),
+  });
+}
+
+/**
+ * Update membership details (admin only)
+ */
+export async function updateMembership(
+  id: string,
+  data: Partial<MembershipData>
+): Promise<ApiResponse> {
+  return apiRequest(`/api/memberships/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * Delete membership (admin only)
+ */
+export async function deleteMembership(id: string): Promise<ApiResponse> {
+  return apiRequest(`/api/memberships/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+/**
+ * Restore membership from trash (admin only)
+ */
+export async function restoreMembership(id: string): Promise<ApiResponse> {
+  return apiRequest(`/api/memberships/${id}/restore`, {
+    method: 'POST',
+  });
+}
+
+/**
+ * Permanently delete membership (superadmin only)
+ */
+export async function permanentlyDeleteMembership(id: string): Promise<ApiResponse> {
+  return apiRequest(`/api/memberships/${id}/permanent`, {
+    method: 'DELETE',
+  });
+}

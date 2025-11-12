@@ -67,11 +67,11 @@ export default function AdminLayout({ children, title, description }: AdminLayou
       isActive: (path) => path.startsWith('/dashboard/contact-messages')
     },
     {
-      href: '/dashboard/memberships',
+      href: '/dashboard/members',
       label: 'Members',
       labelNp: 'सदस्यता',
       icon: Users,
-      isActive: (path) => path.startsWith('/dashboard/memberships')
+      isActive: (path) => path.startsWith('/dashboard/members')
     },
     {
       href: '/dashboard/news',

@@ -9,6 +9,7 @@ import {
   BarChart3,
   Target,
   MessageSquare,
+  Users,
   Settings,
   LogOut,
   Bell,
@@ -61,6 +62,12 @@ export default function DashboardLayout({
       label: 'Messages',
       description: 'Contact Inbox',
       icon: MessageSquare,
+    },
+    {
+      href: '/dashboard/members',
+      label: 'Members',
+      description: 'Membership',
+      icon: Users,
     },
     {
       href: '/dashboard/settings',

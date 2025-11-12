@@ -133,12 +133,19 @@ model Membership {
   address       String
   occupation    String?
   education     String?
-  experience    String?  @db.Text
-  motivation    String?  @db.Text
-  status        String   @default("pending")
+  birthDate     String?
+  gender        String?
+  motivations   String[] // Array of motivation strings
+  skills        String[] // Array of skills
+  availability  String?
+  additionalInfo String? @db.Text
+  status        String   @default("pending") // pending, approved, rejected
+  ipAddress     String?  // User's IP when submitting
+  userAgent     String?  // User's browser/device info
   submittedAt   DateTime @default(now())
   reviewedAt    DateTime?
   reviewedBy    String?
+  notes         String?  @db.Text // Admin notes
   
   // Soft Delete
   isDeleted     Boolean  @default(false)
@@ -149,6 +156,7 @@ model Membership {
   @@index([email])
   @@index([status])
   @@index([isDeleted])
+  @@index([submittedAt])
 }
 
 // News/Updates

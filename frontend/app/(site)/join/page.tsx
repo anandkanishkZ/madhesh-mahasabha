@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Footer } from '@/components/Footer';
-import { submitJoinForm } from '@/lib/firebaseService';
+import { submitMembership } from '@/lib/api';
 import { 
   CheckCircle, 
   Users, 
@@ -144,31 +144,28 @@ export default function JoinPage() {
     setSubmitError(null);
 
     try {
-      // Prepare data for Firebase submission
+      // Prepare data for backend submission
       const submissionData = {
-        ...formData,
-        // Ensure motivations array is populated
-        motivations: formData.additionalInfo ? [formData.additionalInfo] : [],
-        // Set default values for optional fields
-        skills: formData.skills.length > 0 ? formData.skills : [],
-        availability: formData.availability || 'flexible',
-        // Clean phone number
-        phone: formData.phone.replace(/[\s\-\+\(\)]/g, ''),
-        // Trim all string fields
         fullName: formData.fullName.trim(),
         email: formData.email.trim().toLowerCase(),
+        phone: formData.phone.replace(/[\s\-\+\(\)]/g, ''),
         address: formData.address.trim(),
-        occupation: formData.occupation.trim() || 'अन्य',
-        education: formData.education.trim() || 'अन्य',
-        gender: formData.gender || 'अन्य',
+        occupation: formData.occupation.trim() || undefined,
+        education: formData.education.trim() || undefined,
+        birthDate: formData.birthDate || undefined,
+        gender: formData.gender || undefined,
+        motivations: formData.additionalInfo ? [formData.additionalInfo.trim()] : [],
+        skills: formData.skills.length > 0 ? formData.skills : [],
+        availability: formData.availability || undefined,
+        additionalInfo: formData.additionalInfo.trim() || undefined,
       };
 
-      console.log('Submitting form data:', submissionData);
+      console.log('Submitting membership data:', submissionData);
 
-      const result = await submitJoinForm(submissionData);
+      const result = await submitMembership(submissionData);
 
       if (result.success) {
-        console.log('Form submitted successfully with ID:', result.id);
+        console.log('Membership submitted successfully:', result.data);
         setIsSubmitted(true);
         
         // Reset form
@@ -193,7 +190,7 @@ export default function JoinPage() {
         // Scroll to top to show success message
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        console.error('Form submission failed:', result.error);
+        console.error('Membership submission failed:', result.error);
         setSubmitError(result.error || 'फारम पेश गर्नमा समस्या भयो। पुनः प्रयास गर्नुहोस्।');
       }
     } catch (error) {
