@@ -2,15 +2,15 @@ module.exports = {
   apps: [
     {
       name: 'madhesh-backend',
-      script: 'dist/index.js',  // No leading './' - just relative path
+      script: 'dist/index.js',
       cwd: '/home/zwicky/madhesh-mahasabha/backend',
       instances: 2,
-      exec_mode: 'cluster',
+      exec_mode: 'fork',  // Changed from 'cluster' to 'fork'
       env_production: {
         NODE_ENV: 'production',
         PORT: 5002
       },
-      error_file: 'logs/backend-error.log',  // No leading './'
+      error_file: 'logs/backend-error.log',
       out_file: 'logs/backend-out.log',
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
       autorestart: true,
@@ -25,11 +25,12 @@ module.exports = {
       args: 'start',
       cwd: '/home/zwicky/madhesh-mahasabha/frontend',
       instances: 1,
+      exec_mode: 'fork',  // Changed to 'fork' for consistency
       env_production: {
         NODE_ENV: 'production',
         PORT: 3003
       },
-      error_file: 'logs/frontend-error.log',  // No leading './'
+      error_file: 'logs/frontend-error.log',
       out_file: 'logs/frontend-out.log',
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
       autorestart: true,
