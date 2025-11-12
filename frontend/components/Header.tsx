@@ -17,6 +17,7 @@ const navigation = [
   { name: 'कार्यसूची', name_en: 'Agenda', href: '/agenda' },
   { name: 'सदस्यता', name_en: 'Join', href: '/join' },
   { name: 'समाचार', name_en: 'News', href: '/news' },
+  { name: 'प्रेस विज्ञप्ति', name_en: 'Press Releases', href: '/press-releases' },
   { name: 'संसाधन', name_en: 'Resources', href: '/resources' },
   { name: 'सम्पर्क', name_en: 'Contact', href: '/contact' },
   { name: 'मिसन प्रतिनिधिसभा', name_en: 'Mission Representative', href: '/mission-representative', special: true },

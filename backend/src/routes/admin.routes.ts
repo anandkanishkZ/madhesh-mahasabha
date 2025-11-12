@@ -4,23 +4,23 @@ import { authenticate, requireRole } from '../middleware/auth.middleware';
 const router = Router();
 
 // TODO: Implement admin routes
-// Get all admins (superadmin only)
-router.get('/', authenticate, requireRole(['superadmin']), async (_req: Request, res: Response) => {
+// Get all admins (super_admin only)
+router.get('/', authenticate, requireRole(['super_admin']), async (_req: Request, res: Response) => {
   res.status(501).json({ message: 'Not implemented yet' });
 });
 
-// Create new admin (superadmin only)
-router.post('/', authenticate, requireRole(['superadmin']), async (_req: Request, res: Response) => {
+// Create new admin (super_admin only)
+router.post('/', authenticate, requireRole(['super_admin']), async (_req: Request, res: Response) => {
   res.status(501).json({ message: 'Not implemented yet' });
 });
 
-// Update admin (superadmin only)
-router.put('/:id', authenticate, requireRole(['superadmin']), async (_req: Request, res: Response) => {
+// Update admin (super_admin only)
+router.put('/:id', authenticate, requireRole(['super_admin']), async (_req: Request, res: Response) => {
   res.status(501).json({ message: 'Not implemented yet' });
 });
 
-// Delete admin (superadmin only)
-router.delete('/:id', authenticate, requireRole(['superadmin']), async (_req: Request, res: Response) => {
+// Delete admin (super_admin only)
+router.delete('/:id', authenticate, requireRole(['super_admin']), async (_req: Request, res: Response) => {
   res.status(501).json({ message: 'Not implemented yet' });
 });
 

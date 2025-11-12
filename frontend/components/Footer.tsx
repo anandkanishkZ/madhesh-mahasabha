@@ -24,6 +24,7 @@ export function Footer() {
     { name: 'कार्यसूची', href: '/agenda', icon: BookOpen },
     { name: 'सदस्यता', href: '/join', icon: Users },
     { name: 'समाचार', href: '/news', icon: MessageSquare },
+    { name: 'प्रेस विज्ञप्ति', href: '/press-releases', icon: FileText },
   ];
 
   const supportLinks = [

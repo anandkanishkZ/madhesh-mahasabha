@@ -14,17 +14,17 @@ router.get('/:id', async (_req: Request, res: Response) => {
 });
 
 // Create new news (admin only)
-router.post('/', authenticate, requireRole(['admin', 'superadmin']), async (_req: Request, res: Response) => {
+router.post('/', authenticate, requireRole(['admin', 'super_admin']), async (_req: Request, res: Response) => {
   res.status(501).json({ message: 'Not implemented yet' });
 });
 
 // Update news (admin only)
-router.put('/:id', authenticate, requireRole(['admin', 'superadmin']), async (_req: Request, res: Response) => {
+router.put('/:id', authenticate, requireRole(['admin', 'super_admin']), async (_req: Request, res: Response) => {
   res.status(501).json({ message: 'Not implemented yet' });
 });
 
 // Delete news (admin only)
-router.delete('/:id', authenticate, requireRole(['admin', 'superadmin']), async (_req: Request, res: Response) => {
+router.delete('/:id', authenticate, requireRole(['admin', 'super_admin']), async (_req: Request, res: Response) => {
   res.status(501).json({ message: 'Not implemented yet' });
 });
 

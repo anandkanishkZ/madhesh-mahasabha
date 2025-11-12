@@ -183,6 +183,43 @@ model News {
   @@index([isPublished])
 }
 
+// Press Releases
+model PressRelease {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  title         String
+  titleNp       String   // Nepali title
+  content       String   @db.Text
+  contentNp     String   @db.Text
+  excerpt       String?
+  excerptNp     String?
+  category      String   // announcement, statement, event, achievement
+  tags          String[]
+  priority      String   @default("normal") // urgent, high, normal, low
+  imageUrl      String?
+  attachments   String[] // Array of file URLs (PDFs, documents)
+  author        String
+  contactEmail  String?
+  contactPhone  String?
+  publishedAt   DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  isPublished   Boolean  @default(false)
+  viewCount     Int      @default(0)
+  
+  // Soft Delete
+  isDeleted     Boolean  @default(false)
+  deletedAt     DateTime?
+  deletedBy     String?
+  
+  @@map("press_releases")
+  @@index([slug])
+  @@index([category])
+  @@index([priority])
+  @@index([publishedAt])
+  @@index([isPublished])
+  @@index([isDeleted])
+}
+
 // Activity Logs - For audit trail
 model ActivityLog {
   id          String   @id @default(cuid())

@@ -678,3 +678,112 @@ export async function permanentlyDeleteMembership(id: string): Promise<ApiRespon
     method: 'DELETE',
   });
 }
+
+/**
+ * Press Release APIs
+ */
+
+export interface PressReleaseData {
+  slug: string;
+  title: string;
+  titleNp: string;
+  content: string;
+  contentNp: string;
+  excerpt?: string;
+  excerptNp?: string;
+  category: 'announcement' | 'statement' | 'event' | 'achievement';
+  tags?: string[];
+  priority?: 'urgent' | 'high' | 'normal' | 'low';
+  imageUrl?: string;
+  attachments?: string[];
+  author: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  isPublished?: boolean;
+}
+
+export interface PressRelease extends PressReleaseData {
+  id: string;
+  publishedAt: string;
+  updatedAt: string;
+  viewCount: number;
+  isDeleted: boolean;
+}
+
+/**
+ * Get all press releases (public)
+ */
+export async function getPressReleases(params?: {
+  category?: string;
+  priority?: string;
+  limit?: number;
+  offset?: number;
+  includeUnpublished?: boolean;
+}): Promise<ApiResponse<{ pressReleases: PressRelease[]; pagination: any }>> {
+  const queryParams = new URLSearchParams();
+  if (params?.category) queryParams.append('category', params.category);
+  if (params?.priority) queryParams.append('priority', params.priority);
+  if (params?.limit) queryParams.append('limit', params.limit.toString());
+  if (params?.offset) queryParams.append('offset', params.offset.toString());
+  if (params?.includeUnpublished) queryParams.append('includeUnpublished', 'true');
+
+  return apiRequest(`/api/press-releases?${queryParams.toString()}`, {
+    method: 'GET',
+  });
+}
+
+/**
+ * Get single press release by slug (public)
+ */
+export async function getPressReleaseBySlug(slug: string): Promise<ApiResponse<PressRelease>> {
+  return apiRequest(`/api/press-releases/${slug}`, {
+    method: 'GET',
+  });
+}
+
+/**
+ * Get single press release by ID (admin - includes unpublished)
+ */
+export async function getPressReleaseById(id: string): Promise<ApiResponse<PressRelease>> {
+  return apiRequest(`/api/press-releases/${id}`, {
+    method: 'GET',
+  });
+}
+
+/**
+ * Create new press release (admin only)
+ */
+export async function createPressRelease(data: PressReleaseData): Promise<ApiResponse<PressRelease>> {
+  return apiRequest('/api/press-releases', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * Update press release (admin only)
+ */
+export async function updatePressRelease(id: string, data: Partial<PressReleaseData>): Promise<ApiResponse<PressRelease>> {
+  return apiRequest(`/api/press-releases/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * Delete press release (admin only)
+ */
+export async function deletePressRelease(id: string): Promise<ApiResponse> {
+  return apiRequest(`/api/press-releases/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+/**
+ * Get press release categories and priorities metadata
+ */
+export async function getPressReleaseMetadata(): Promise<ApiResponse> {
+  return apiRequest('/api/press-releases/meta/categories', {
+    method: 'GET',
+  });
+}

@@ -10,6 +10,7 @@ import missionRoutes from './routes/mission.routes';
 import contactRoutes from './routes/contact.routes';
 import membershipRoutes from './routes/membership.routes';
 import newsRoutes from './routes/news.routes';
+import pressReleaseRoutes from './routes/press-release.routes';
 import uploadRoutes from './routes/upload.routes';
 import { errorHandler } from './middleware/error.middleware';
 import { logger } from './middleware/logger.middleware';
@@ -67,6 +68,7 @@ app.use('/api/mission-representatives', missionRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/memberships', membershipRoutes);
 app.use('/api/news', newsRoutes);
+app.use('/api/press-releases', pressReleaseRoutes);
 app.use('/api/upload', uploadRoutes);
 
 // 404 Handler

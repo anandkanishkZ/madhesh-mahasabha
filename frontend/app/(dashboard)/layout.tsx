@@ -16,7 +16,8 @@ import {
   Menu,
   X,
   Search,
-  ExternalLink
+  ExternalLink,
+  Megaphone
 } from 'lucide-react';
 import { isAuthenticated, logout } from '@/lib/api';
 
@@ -68,6 +69,12 @@ export default function DashboardLayout({
       label: 'Members',
       description: 'Membership',
       icon: Users,
+    },
+    {
+      href: '/dashboard/press-releases',
+      label: 'Press Releases',
+      description: 'Announcements',
+      icon: Megaphone,
     },
     {
       href: '/dashboard/settings',

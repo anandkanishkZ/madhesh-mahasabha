@@ -285,9 +285,9 @@ router.post('/:id/restore', authenticate, async (req: Request, res: Response) =>
 
 /**
  * DELETE /api/mission-representatives/:id/permanent
- * Permanently delete mission representative (superadmin only)
+ * Permanently delete mission representative (super_admin only)
  */
-router.delete('/:id/permanent', authenticate, requireRole(['superadmin']), async (req: Request, res: Response) => {
+router.delete('/:id/permanent', authenticate, requireRole(['super_admin']), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 

@@ -251,7 +251,7 @@ router.post('/', async (req: Request, res: Response) => {
  * Update membership (Admin only)
  * PUT /api/memberships/:id
  */
-router.put('/:id', authenticate, requireRole(['admin', 'superadmin']), async (req: Request, res: Response) => {
+router.put('/:id', authenticate, requireRole(['admin', 'super_admin']), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { status, notes, ...updateData } = req.body;
@@ -341,7 +341,7 @@ router.put('/:id', authenticate, requireRole(['admin', 'superadmin']), async (re
  * Soft delete membership (Move to trash)
  * DELETE /api/memberships/:id
  */
-router.delete('/:id', authenticate, requireRole(['admin', 'superadmin']), async (req: Request, res: Response) => {
+router.delete('/:id', authenticate, requireRole(['admin', 'super_admin']), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const adminId = (req as any).admin?.id;
@@ -411,7 +411,7 @@ router.delete('/:id', authenticate, requireRole(['admin', 'superadmin']), async 
  * Restore membership from trash
  * POST /api/memberships/:id/restore
  */
-router.post('/:id/restore', authenticate, requireRole(['admin', 'superadmin']), async (req: Request, res: Response) => {
+router.post('/:id/restore', authenticate, requireRole(['admin', 'super_admin']), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const adminId = (req as any).admin?.id;
@@ -477,10 +477,10 @@ router.post('/:id/restore', authenticate, requireRole(['admin', 'superadmin']), 
 });
 
 /**
- * Permanently delete membership (Superadmin only)
+ * Permanently delete membership (super_admin only)
  * DELETE /api/memberships/:id/permanent
  */
-router.delete('/:id/permanent', authenticate, requireRole(['superadmin']), async (req: Request, res: Response) => {
+router.delete('/:id/permanent', authenticate, requireRole(['super_admin']), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const adminId = (req as any).admin?.id;

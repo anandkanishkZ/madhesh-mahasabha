@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  // Removed 'output: export' to support dynamic routes and authentication
+  // Use standard Next.js deployment (Vercel, Node.js server, etc.)
   eslint: {
     ignoreDuringBuilds: true,
   },
