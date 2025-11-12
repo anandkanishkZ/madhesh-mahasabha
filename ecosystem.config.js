@@ -2,16 +2,16 @@ module.exports = {
   apps: [
     {
       name: 'madhesh-backend',
-      script: './dist/index.js',  // Changed from './backend/dist/index.js'
-      cwd: '/home/zwicky/madhesh-mahasabha/backend',  // This already points to backend directory
+      script: 'dist/index.js',  // No leading './' - just relative path
+      cwd: '/home/zwicky/madhesh-mahasabha/backend',
       instances: 2,
       exec_mode: 'cluster',
       env_production: {
         NODE_ENV: 'production',
         PORT: 5002
       },
-      error_file: './logs/backend-error.log',
-      out_file: './logs/backend-out.log',
+      error_file: 'logs/backend-error.log',  // No leading './'
+      out_file: 'logs/backend-out.log',
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
       autorestart: true,
       max_memory_restart: '500M',
@@ -29,8 +29,8 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: 3003
       },
-      error_file: './logs/frontend-error.log',
-      out_file: './logs/frontend-out.log',
+      error_file: 'logs/frontend-error.log',  // No leading './'
+      out_file: 'logs/frontend-out.log',
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
       autorestart: true,
       max_memory_restart: '800M',
