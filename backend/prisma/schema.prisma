@@ -95,6 +95,8 @@ model MissionRepresentative {
   @@index([status])
   @@index([district])
   @@index([isDeleted])
+  @@index([status, isDeleted]) // Composite index for filtering
+  @@index([district, status]) // Composite index for district-based queries
 }
 
 // Contact Messages
@@ -122,6 +124,8 @@ model ContactMessage {
   @@index([status])
   @@index([createdAt])
   @@index([isDeleted])
+  @@index([email])
+  @@index([status, isDeleted]) // Composite index for admin filtering
 }
 
 // Membership Applications
@@ -157,6 +161,7 @@ model Membership {
   @@index([status])
   @@index([isDeleted])
   @@index([submittedAt])
+  @@index([status, isDeleted]) // Composite index for filtering
 }
 
 // News/Updates
@@ -218,6 +223,8 @@ model PressRelease {
   @@index([publishedAt])
   @@index([isPublished])
   @@index([isDeleted])
+  @@index([isPublished, isDeleted, publishedAt]) // Composite index for common queries
+  @@index([category, isPublished, isDeleted]) // Composite index for filtered queries
 }
 
 // Activity Logs - For audit trail

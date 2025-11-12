@@ -1,6 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { authenticate, requireRole } from '../middleware/auth.middleware';
 import { prisma } from '../lib/prisma';
+import { sanitizeObject } from '../lib/sanitize';
+import { membershipLimiter } from '../middleware/rate-limit.middleware';
 
 const router = Router();
 
@@ -142,7 +144,7 @@ router.get('/:id', authenticate, async (req: Request, res: Response) => {
  * Create new membership application (Public endpoint)
  * POST /api/memberships
  */
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', membershipLimiter, async (req: Request, res: Response) => {
   try {
     const {
       fullName,
@@ -175,10 +177,19 @@ router.post('/', async (req: Request, res: Response) => {
       });
     }
 
+    // Sanitize all input data to prevent XSS attacks
+    const sanitizedData = sanitizeObject(req.body, {
+      plainTextFields: ['fullName', 'address', 'occupation', 'education', 'gender', 'availability'],
+      emailFields: ['email'],
+      phoneFields: ['phone'],
+      htmlFields: ['additionalInfo'],
+      arrayFields: ['motivations', 'skills'],
+    });
+
     // Check for duplicate email
     const existingMembership = await prisma.membership.findFirst({
       where: {
-        email: email.toLowerCase(),
+        email: sanitizedData.email.toLowerCase(),
         isDeleted: false,
       },
     });
@@ -200,17 +211,17 @@ router.post('/', async (req: Request, res: Response) => {
     // Create membership
     const membership = await prisma.membership.create({
       data: {
-        fullName: fullName.trim(),
-        email: email.toLowerCase().trim(),
-        phone: phone.replace(/[\s\-\+\(\)]/g, ''),
-        address: address.trim(),
-        occupation: occupation?.trim() || null,
-        education: education?.trim() || null,
-        gender: gender || null,
-        motivations: Array.isArray(motivations) ? motivations : [],
-        skills: Array.isArray(skills) ? skills : [],
-        availability: availability || null,
-        additionalInfo: additionalInfo?.trim() || null,
+        fullName: sanitizedData.fullName,
+        email: sanitizedData.email.toLowerCase(),
+        phone: sanitizedData.phone,
+        address: sanitizedData.address,
+        occupation: sanitizedData.occupation || null,
+        education: sanitizedData.education || null,
+        gender: sanitizedData.gender || null,
+        motivations: sanitizedData.motivations || [],
+        skills: sanitizedData.skills || [],
+        availability: sanitizedData.availability || null,
+        additionalInfo: sanitizedData.additionalInfo || null,
         status: 'pending',
         ipAddress,
         userAgent,
@@ -223,7 +234,7 @@ router.post('/', async (req: Request, res: Response) => {
         action: 'create',
         entity: 'membership',
         entityId: membership.id,
-        details: `New membership application submitted by ${fullName} (${email})`,
+        details: `New membership application submitted by ${sanitizedData.fullName} (${sanitizedData.email})`,
         ipAddress,
         userAgent,
       },

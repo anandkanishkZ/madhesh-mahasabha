@@ -2,6 +2,8 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { authenticate, requireRole, AuthRequest } from '../middleware/auth.middleware';
 import prisma from '../lib/prisma';
+import { sanitizeObject } from '../lib/sanitize';
+import { contactLimiter } from '../middleware/rate-limit.middleware';
 
 const router = Router();
 
@@ -142,10 +144,18 @@ router.get('/:id', authenticate, async (req: Request, res: Response) => {
  * POST /api/contact
  * Create new contact message (public endpoint - no authentication required)
  */
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', contactLimiter, async (req: Request, res: Response) => {
   try {
     // Validate input
     const validatedData = contactMessageSchema.parse(req.body);
+
+    // Sanitize all input data to prevent XSS attacks
+    const sanitizedData = sanitizeObject(validatedData, {
+      plainTextFields: ['name', 'subject', 'organization'],
+      htmlFields: ['message'],
+      emailFields: ['email'],
+      phoneFields: ['phone'],
+    });
 
     // Get IP address (handle proxies and direct connections)
     const ipAddress = (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() 
@@ -160,12 +170,12 @@ router.post('/', async (req: Request, res: Response) => {
     // Create contact message
     const message = await prisma.contactMessage.create({
       data: {
-        name: validatedData.name,
-        email: validatedData.email,
-        phone: validatedData.phone || null,
-        subject: validatedData.subject,
-        message: validatedData.message,
-        organization: validatedData.organization || null,
+        name: sanitizedData.name,
+        email: sanitizedData.email,
+        phone: sanitizedData.phone || null,
+        subject: sanitizedData.subject,
+        message: sanitizedData.message,
+        organization: sanitizedData.organization || null,
         ipAddress: ipAddress,
         userAgent: userAgent,
         status: 'unread',
@@ -178,7 +188,7 @@ router.post('/', async (req: Request, res: Response) => {
         action: 'create',
         entity: 'contact_message',
         entityId: message.id,
-        details: `New contact message from ${validatedData.name} (${validatedData.email}) - IP: ${ipAddress}`,
+        details: `New contact message from ${sanitizedData.name} (${sanitizedData.email}) - IP: ${ipAddress}`,
         ipAddress: ipAddress,
         userAgent: userAgent,
       },

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import prisma from '../lib/prisma';
 import { hashPassword, verifyPassword, generateToken, generateSessionToken, getSessionExpiry } from '../lib/auth';
 import { authenticate, AuthRequest } from '../middleware/auth.middleware';
+import { authLimiter } from '../middleware/rate-limit.middleware';
 
 const router = Router();
 
@@ -16,7 +17,7 @@ const loginSchema = z.object({
  * POST /api/auth/login
  * Admin login - supports both username and email
  */
-router.post('/login', async (req: Request, res: Response): Promise<void> => {
+router.post('/login', authLimiter, async (req: Request, res: Response): Promise<void> => {
   try {
     // Validate input
     const { username, password } = loginSchema.parse(req.body);

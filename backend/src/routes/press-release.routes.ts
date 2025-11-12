@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { authenticate, requireRole } from '../middleware/auth.middleware';
 import prisma from '../lib/prisma';
 import { z } from 'zod';
+import { sanitizeObject } from '../lib/sanitize';
 
 const router = Router();
 
@@ -188,9 +189,20 @@ router.post('/', authenticate, requireRole(['admin', 'super_admin']), async (req
   try {
     const validatedData = createPressReleaseSchema.parse(req.body);
 
+    // Sanitize all input data to prevent XSS attacks
+    const sanitizedData = sanitizeObject(validatedData, {
+      htmlFields: ['content', 'contentNp', 'excerpt', 'excerptNp'],
+      plainTextFields: ['title', 'titleNp', 'author'],
+      slugFields: ['slug'],
+      urlFields: ['imageUrl'],
+      emailFields: ['contactEmail'],
+      phoneFields: ['contactPhone'],
+      arrayFields: ['tags', 'attachments'],
+    });
+
     // Check if slug already exists
     const existing = await prisma.pressRelease.findUnique({
-      where: { slug: validatedData.slug },
+      where: { slug: sanitizedData.slug },
     });
 
     if (existing) {
@@ -202,12 +214,12 @@ router.post('/', authenticate, requireRole(['admin', 'super_admin']), async (req
 
     // Clean up empty strings to undefined for optional fields
     const cleanData = {
-      ...validatedData,
-      excerpt: validatedData.excerpt || undefined,
-      excerptNp: validatedData.excerptNp || undefined,
-      imageUrl: validatedData.imageUrl || undefined,
-      contactEmail: validatedData.contactEmail || undefined,
-      contactPhone: validatedData.contactPhone || undefined,
+      ...sanitizedData,
+      excerpt: sanitizedData.excerpt || undefined,
+      excerptNp: sanitizedData.excerptNp || undefined,
+      imageUrl: sanitizedData.imageUrl || undefined,
+      contactEmail: sanitizedData.contactEmail || undefined,
+      contactPhone: sanitizedData.contactPhone || undefined,
     };
 
     const pressRelease = await prisma.pressRelease.create({
@@ -243,6 +255,17 @@ router.put('/:id', authenticate, requireRole(['admin', 'super_admin']), async (r
     const { id } = req.params;
     const validatedData = updatePressReleaseSchema.parse(req.body);
 
+    // Sanitize all input data to prevent XSS attacks
+    const sanitizedData = sanitizeObject(validatedData, {
+      htmlFields: ['content', 'contentNp', 'excerpt', 'excerptNp'],
+      plainTextFields: ['title', 'titleNp', 'author'],
+      slugFields: ['slug'],
+      urlFields: ['imageUrl'],
+      emailFields: ['contactEmail'],
+      phoneFields: ['contactPhone'],
+      arrayFields: ['tags', 'attachments'],
+    });
+
     // Check if press release exists
     const existing = await prisma.pressRelease.findFirst({
       where: { id, isDeleted: false },
@@ -256,9 +279,9 @@ router.put('/:id', authenticate, requireRole(['admin', 'super_admin']), async (r
     }
 
     // If slug is being updated, check for uniqueness
-    if (validatedData.slug && validatedData.slug !== existing.slug) {
+    if (sanitizedData.slug && sanitizedData.slug !== existing.slug) {
       const slugExists = await prisma.pressRelease.findUnique({
-        where: { slug: validatedData.slug },
+        where: { slug: sanitizedData.slug },
       });
 
       if (slugExists) {
@@ -271,7 +294,7 @@ router.put('/:id', authenticate, requireRole(['admin', 'super_admin']), async (r
 
     const pressRelease = await prisma.pressRelease.update({
       where: { id },
-      data: validatedData,
+      data: sanitizedData,
     });
 
     res.status(200).json({

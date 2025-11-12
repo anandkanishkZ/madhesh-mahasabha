@@ -3,7 +3,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import path from 'path';
-import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/auth.routes';
 import adminRoutes from './routes/admin.routes';
 import missionRoutes from './routes/mission.routes';
@@ -14,32 +13,27 @@ import pressReleaseRoutes from './routes/press-release.routes';
 import uploadRoutes from './routes/upload.routes';
 import { errorHandler } from './middleware/error.middleware';
 import { logger } from './middleware/logger.middleware';
+import { generalLimiter } from './middleware/rate-limit.middleware';
+import { validateEnv } from './lib/env';
 
-// Load environment variables
+// Load and validate environment variables
 dotenv.config();
+const env = validateEnv();
 
 const app: Application = express();
-const PORT = process.env.PORT || 5000;
+const PORT = env.PORT || 5000;
 
 // Security Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Rate Limiting
-const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'),
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-app.use('/api/', limiter);
+// General Rate Limiting for all API routes
+app.use('/api/', generalLimiter);
 
 // Body Parser Middleware
 app.use(express.json({ limit: '10mb' }));
@@ -57,7 +51,7 @@ app.get('/health', (_req, res) => {
     status: 'ok',
     message: 'Madhesh Mahasabha Backend API is running',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: env.NODE_ENV || 'development'
   });
 });
 
@@ -90,11 +84,12 @@ app.listen(PORT, () => {
 ║                                                           ║
 ║     🚀 Madhesh Mahasabha Backend API                     ║
 ║                                                           ║
-║     Environment: ${process.env.NODE_ENV || 'development'.padEnd(32)} ║
+║     Environment: ${(env.NODE_ENV || 'development').padEnd(32)} ║
 ║     Port: ${PORT.toString().padEnd(47)} ║
 ║     URL: http://localhost:${PORT}                          ║
 ║                                                           ║
 ║     Status: ✅ Server is running                         ║
+║     Security: ✅ Environment validated                   ║
 ║                                                           ║
 ╚═══════════════════════════════════════════════════════════╝
   `);
