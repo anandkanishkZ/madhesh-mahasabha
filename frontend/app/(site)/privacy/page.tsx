@@ -1,16 +1,39 @@
-'use client';
-
 import React from 'react';
 import { Footer } from '@/components/Footer';
 import { Section } from '@/components/ui/Section';
 import { LegalSidebar } from '@/components/legal/LegalSidebar';
 import { Shield, Eye, Lock, Database, Cookie, Mail, Phone } from 'lucide-react';
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy - Madhesh Mahasabha',
+  description: 'मधेश महासभाको गोपनीयता नीति। हामी तपाईंको व्यक्तिगत जानकारीको सुरक्षा र गोपनीयतालाई कसरी सुरक्षित राख्छौं भन्ने बारे जान्नुहोस्।',
+  keywords: 'गोपनीयता नीति, privacy policy, मधेश महासभा, madhesh mahasabha, data protection, व्यक्तिगत जानकारी',
+  openGraph: {
+    title: 'गोपनीयता नीति - मधेश महासभा',
+    description: 'मधेश महासभाको गोपनीयता नीति र डाटा सुरक्षा नीतिहरू',
+    type: 'website',
+    locale: 'ne_NP',
+  },
+};
 
 export default function PrivacyPolicy() {
   return (
     <>
       <main className="min-h-screen bg-gray-50">
+        {/* Page Title */}
+        <Section className="py-8 bg-gradient-to-r from-mm-primary/10 via-purple-50 to-indigo-50">
+          <div className="text-center">
+            <h1 className="nepali-heading text-4xl md:text-5xl font-bold text-mm-ink mb-4">
+              गोपनीयता नीति
+            </h1>
+            <p className="nepali-text text-lg text-gray-600 max-w-2xl mx-auto">
+              हामी तपाईंको व्यक्तिगत जानकारीको सुरक्षा र गोपनीयतालाई गम्भीरताका साथ लिन्छौं।
+            </p>
+          </div>
+        </Section>
+
         {/* Breadcrumb */}
         <Section className="py-4 bg-white border-b border-gray-200">
           <nav className="flex items-center space-x-2 text-sm">

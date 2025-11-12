@@ -1,16 +1,39 @@
-'use client';
-
 import React from 'react';
 import { Footer } from '@/components/Footer';
 import { Section } from '@/components/ui/Section';
 import { LegalSidebar } from '@/components/legal/LegalSidebar';
 import { FileText, Eye, Users, Lock, AlertTriangle, Gavel, Mail, Phone } from 'lucide-react';
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Terms & Conditions - Madhesh Mahasabha',
+  description: 'मधेश महासभाको वेबसाइट र सेवाहरूको प्रयोगसँग सम्बन्धित नियम र शर्तहरू। हाम्रा सेवाहरू प्रयोग गर्नुअघि कृपया यी नियमहरू पढ्नुहोस्।',
+  keywords: 'नियम र शर्तहरू, terms and conditions, मधेश महासभा, madhesh mahasabha, legal terms, वैधानिक नियम',
+  openGraph: {
+    title: 'नियम र शर्तहरू - मधेश महासभा',
+    description: 'मधेश महासभाको सेवा प्रयोगका नियम र शर्तहरू',
+    type: 'website',
+    locale: 'ne_NP',
+  },
+};
 
 export default function TermsAndConditions() {
   return (
     <>
       <main className="min-h-screen bg-gray-50">
+        {/* Page Title */}
+        <Section className="py-8 bg-gradient-to-r from-mm-primary/10 via-purple-50 to-indigo-50">
+          <div className="text-center">
+            <h1 className="nepali-heading text-4xl md:text-5xl font-bold text-mm-ink mb-4">
+              नियम र शर्तहरू
+            </h1>
+            <p className="nepali-text text-lg text-gray-600 max-w-2xl mx-auto">
+              हाम्रो वेबसाइट र सेवाहरूको प्रयोगसँग सम्बन्धित नियम र शर्तहरू।
+            </p>
+          </div>
+        </Section>
+
         {/* Breadcrumb */}
         <Section className="py-4 bg-white border-b border-gray-200">
           <nav className="flex items-center space-x-2 text-sm">

@@ -28,10 +28,11 @@ import {
   GraduationCap,
   Heart,
   RefreshCw,
-  Settings
+  Settings,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import {
   Dialog,
   DialogContent,
@@ -462,245 +463,170 @@ export default function MembersPage() {
 
       {/* Detail Dialog */}
       <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
-        <DialogContent className="max-w-7xl w-[95vw] max-h-[90vh] p-0 overflow-hidden flex flex-col">
-          <DialogHeader className="sr-only">
+        <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
             <DialogTitle>Membership Details</DialogTitle>
             <DialogDescription>Complete information about the membership application</DialogDescription>
           </DialogHeader>
           {selectedMembership && (
-            <div className="flex flex-col h-full bg-white rounded-lg overflow-hidden">
-              {/* Header */}
-              <div className="relative bg-gradient-to-r from-blue-600 to-purple-700 text-white p-3 sm:p-4 lg:p-6 pb-4 sm:pb-6 flex-shrink-0" style={{ minHeight: '100px' }}>
-                <div className="absolute top-0 right-0 w-12 h-12 sm:w-16 sm:h-16 lg:w-24 lg:h-24 opacity-10">
-                  <Users className="w-full h-full" />
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-2xl">{selectedMembership.fullName}</CardTitle>
+                    <p className="text-muted-foreground mt-1">
+                      Submitted on {formatDate(selectedMembership.submittedAt)}
+                    </p>
+                  </div>
+                  {getStatusBadge(selectedMembership.status)}
                 </div>
-                <div className="relative z-10">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
-                    <div className="min-w-0 flex-1">
-                      <h2 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold break-words leading-tight">{selectedMembership.fullName}</h2>
+              </CardHeader>
+
+              <CardContent className="space-y-6">
+                {/* Contact Information */}
+                <div>
+                  <h3 className="font-semibold text-lg mb-3 flex items-center">
+                    <Mail className="w-5 h-5 mr-2 text-mm-primary" />
+                    Contact Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Full Name</p>
+                      <p className="font-medium">{selectedMembership.fullName}</p>
                     </div>
-                    <div className="flex items-start sm:items-center gap-3 flex-shrink-0">
-                      {getStatusBadge(selectedMembership.status)}
+                    <div>
+                      <p className="text-sm text-muted-foreground">Email</p>
+                      <p className="font-medium">{selectedMembership.email}</p>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-6 text-blue-100">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      <span className="text-sm">Submitted {formatDate(selectedMembership.submittedAt)}</span>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Phone</p>
+                      <p className="font-medium">{selectedMembership.phone}</p>
                     </div>
-                    {selectedMembership.reviewedAt && (
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4" />
-                        <span className="text-sm">Reviewed {formatDate(selectedMembership.reviewedAt)}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="flex-1 overflow-y-scroll overflow-x-hidden p-3 sm:p-4 lg:p-6 bg-gray-50">
-                <div className="max-w-full w-full">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 pb-6">
-                  
-                    {/* Left Column - Personal & Contact */}
-                    <div className="space-y-4 min-w-0 overflow-hidden">
-                    
-                      {/* Personal Information Card */}
-                      <Card className="border-0 shadow-md hover:shadow-lg transition-shadow w-full overflow-hidden">
-                        <div className="p-3 sm:p-4 lg:p-6">
-                        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 lg:mb-6">
-                          <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg flex-shrink-0">
-                            <UserCheck className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-blue-600" />
-                          </div>
-                          <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-800 min-w-0">Personal Information</h3>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
-                          <div className="space-y-1 min-w-0">
-                            <p className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wide">Full Name</p>
-                            <p className="text-sm sm:text-base lg:text-lg font-semibold text-gray-800 break-words" title={selectedMembership.fullName}>{selectedMembership.fullName}</p>
-                          </div>
-                          <div className="space-y-1 min-w-0">
-                            <p className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wide">Gender</p>
-                            <p className="text-sm sm:text-base lg:text-lg text-gray-700">{selectedMembership.gender || 'Not specified'}</p>
-                          </div>
-                          <div className="space-y-1 min-w-0">
-                            <p className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wide">Birth Date</p>
-                            <p className="text-sm sm:text-base lg:text-lg text-gray-700">{selectedMembership.birthDate || 'Not specified'}</p>
-                          </div>
-                          <div className="space-y-1 min-w-0">
-                            <p className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wide">Availability</p>
-                            <p className="text-sm sm:text-base lg:text-lg text-gray-700 break-words">{selectedMembership.availability || 'Not specified'}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-
-                      {/* Professional Information Card */}
-                      <Card className="border-0 shadow-md hover:shadow-lg transition-shadow w-full overflow-hidden">
-                        <div className="p-3 sm:p-4 lg:p-6">
-                        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 lg:mb-6">
-                          <div className="p-1.5 sm:p-2 bg-green-100 rounded-lg flex-shrink-0">
-                            <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-green-600" />
-                          </div>
-                          <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-800 min-w-0">Professional Background</h3>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
-                          <div className="space-y-1 min-w-0">
-                            <p className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wide">Occupation</p>
-                            <p className="text-sm sm:text-base lg:text-lg text-gray-700 break-words">{selectedMembership.occupation || 'Not specified'}</p>
-                          </div>
-                          <div className="space-y-1 min-w-0">
-                            <p className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wide">Education</p>
-                            <div className="flex items-start gap-2">
-                              <GraduationCap className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 mt-1 flex-shrink-0" />
-                              <p className="text-sm sm:text-base lg:text-lg text-gray-700 break-words min-w-0">{selectedMembership.education || 'Not specified'}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-
-                      {/* Contact Information Card */}
-                      <Card className="border-0 shadow-md hover:shadow-lg transition-shadow w-full overflow-hidden">
-                        <div className="p-3 sm:p-4 lg:p-6">
-                        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 lg:mb-6">
-                          <div className="p-1.5 sm:p-2 bg-purple-100 rounded-lg flex-shrink-0">
-                            <Mail className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-purple-600" />
-                          </div>
-                          <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-800 min-w-0">Contact Information</h3>
-                        </div>
-                        <div className="space-y-3 sm:space-y-4">
-                          <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-gray-50 rounded-lg">
-                            <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 flex-shrink-0" />
-                            <div className="min-w-0 flex-1">
-                              <p className="text-xs sm:text-sm font-medium text-gray-500">Email</p>
-                              <p className="text-sm sm:text-base text-gray-800 truncate" title={selectedMembership.email}>{selectedMembership.email}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-gray-50 rounded-lg">
-                            <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 flex-shrink-0" />
-                            <div className="min-w-0 flex-1">
-                              <p className="text-xs sm:text-sm font-medium text-gray-500">Phone</p>
-                              <p className="text-sm sm:text-base text-gray-800 truncate" title={selectedMembership.phone}>{selectedMembership.phone}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-2 sm:gap-3 p-2.5 sm:p-3 bg-gray-50 rounded-lg">
-                            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 mt-0.5 flex-shrink-0" />
-                            <div className="min-w-0 flex-1">
-                              <p className="text-xs sm:text-sm font-medium text-gray-500">Address</p>
-                              <p className="text-sm sm:text-base text-gray-800 break-words">{selectedMembership.address}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  </div>
-
-                    {/* Right Column - Skills & Motivation */}
-                    <div className="space-y-4 min-w-0 overflow-hidden">
-                    
-                    {/* Skills Card */}
-                    {selectedMembership.skills && selectedMembership.skills.length > 0 && (
-                      <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-                        <div className="p-3 sm:p-4 lg:p-6">
-                          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 lg:mb-6">
-                            <div className="p-1.5 sm:p-2 bg-orange-100 rounded-lg flex-shrink-0">
-                              <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-orange-600" />
-                            </div>
-                            <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-800 min-w-0">Skills & Expertise</h3>
-                          </div>
-                          <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                            {selectedMembership.skills.map((skill, idx) => (
-                              <Badge key={idx} className="bg-blue-50 text-blue-700 border-blue-200 px-2 sm:px-3 py-1 text-xs sm:text-sm break-words">
-                                {skill}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      </Card>
-                    )}
-
-                    {/* Motivations Card */}
-                    {selectedMembership.motivations && selectedMembership.motivations.length > 0 && (
-                      <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-                        <div className="p-3 sm:p-4 lg:p-6">
-                          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 lg:mb-6">
-                            <div className="p-1.5 sm:p-2 bg-pink-100 rounded-lg flex-shrink-0">
-                              <Heart className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-pink-600" />
-                            </div>
-                            <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-800 min-w-0">Motivations</h3>
-                          </div>
-                          <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                            {selectedMembership.motivations.map((motivation, idx) => (
-                              <Badge key={idx} className="bg-pink-50 text-pink-700 border-pink-200 px-2 sm:px-3 py-1 text-xs sm:text-sm break-words">
-                                {motivation}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      </Card>
-                    )}
-
-                    {/* Additional Info Card */}
-                    {selectedMembership.additionalInfo && (
-                      <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-                        <div className="p-3 sm:p-4 lg:p-6">
-                          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 lg:mb-6">
-                            <div className="p-1.5 sm:p-2 bg-indigo-100 rounded-lg flex-shrink-0">
-                              <Heart className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-indigo-600" />
-                            </div>
-                            <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-800 min-w-0">Additional Information</h3>
-                          </div>
-                          <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
-                            <p className="text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
-                              {selectedMembership.additionalInfo}
-                            </p>
-                          </div>
-                        </div>
-                      </Card>
-                    )}
-
-                    {/* Admin Notes */}
-                    {selectedMembership.notes && (
-                      <Card className="border-0 shadow-md hover:shadow-lg transition-shadow border-l-4 border-l-yellow-500">
-                        <div className="p-3 sm:p-4 lg:p-6">
-                          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                            <div className="p-1.5 sm:p-2 bg-yellow-100 rounded-lg flex-shrink-0">
-                              <Settings className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-yellow-600" />
-                            </div>
-                            <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-800 min-w-0">Admin Notes</h3>
-                          </div>
-                          <div className="bg-yellow-50 rounded-lg p-3 sm:p-4">
-                            <p className="text-sm sm:text-base text-gray-700 mb-3 break-words">{selectedMembership.notes}</p>
-                            {selectedMembership.reviewedBy && (
-                              <div className="text-xs sm:text-sm text-gray-600 border-t border-yellow-200 pt-3">
-                                <span className="font-medium">Reviewed by:</span> <span className="break-words">{selectedMembership.reviewedBy}</span>
-                                {selectedMembership.reviewedAt && (
-                                  <span className="ml-2 block sm:inline">on {formatDate(selectedMembership.reviewedAt)}</span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </Card>
-                    )}
+                    <div>
+                      <p className="text-sm text-muted-foreground">Gender</p>
+                      <p className="font-medium">{selectedMembership.gender || 'Not specified'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Birth Date</p>
+                      <p className="font-medium">{selectedMembership.birthDate || 'Not specified'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Availability</p>
+                      <p className="font-medium">{selectedMembership.availability || 'Not specified'}</p>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Footer Actions */}
-              <div className="border-t bg-white p-4 flex-shrink-0 shadow-lg">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                {/* Address Information */}
+                <div>
+                  <h3 className="font-semibold text-lg mb-3 flex items-center">
+                    <MapPin className="w-5 h-5 mr-2 text-mm-primary" />
+                    Address Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7">
+                    <div className="md:col-span-2">
+                      <p className="text-sm text-muted-foreground">Full Address</p>
+                      <p className="font-medium">{selectedMembership.address}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Professional Information */}
+                <div>
+                  <h3 className="font-semibold text-lg mb-3 flex items-center">
+                    <Briefcase className="w-5 h-5 mr-2 text-mm-primary" />
+                    Professional Background
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Occupation</p>
+                      <p className="font-medium">{selectedMembership.occupation || 'Not specified'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Education</p>
+                      <p className="font-medium">{selectedMembership.education || 'Not specified'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Skills Information */}
+                {selectedMembership.skills && selectedMembership.skills.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-lg mb-3 flex items-center">
+                      <GraduationCap className="w-5 h-5 mr-2 text-mm-primary" />
+                      Skills & Expertise
+                    </h3>
+                    <div className="pl-7">
+                      <div className="flex flex-wrap gap-2">
+                        {selectedMembership.skills.map((skill, idx) => (
+                          <Badge key={idx} variant="secondary">{skill}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Motivations */}
+                {selectedMembership.motivations && selectedMembership.motivations.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-lg mb-3 flex items-center">
+                      <Heart className="w-5 h-5 mr-2 text-mm-primary" />
+                      Motivations
+                    </h3>
+                    <div className="pl-7">
+                      <div className="flex flex-wrap gap-2">
+                        {selectedMembership.motivations.map((motivation, idx) => (
+                          <Badge key={idx} variant="secondary">{motivation}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Additional Information */}
+                {selectedMembership.additionalInfo && (
+                  <div>
+                    <h3 className="font-semibold text-lg mb-3 flex items-center">
+                      <FileText className="w-5 h-5 mr-2 text-mm-primary" />
+                      Additional Information
+                    </h3>
+                    <div className="pl-7">
+                      <p className="font-medium whitespace-pre-wrap">{selectedMembership.additionalInfo}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Admin Notes */}
+                {selectedMembership.notes && (
+                  <div>
+                    <h3 className="font-semibold text-lg mb-3 flex items-center">
+                      <Settings className="w-5 h-5 mr-2 text-mm-primary" />
+                      Admin Notes
+                    </h3>
+                    <div className="pl-7">
+                      <p className="font-medium mb-3">{selectedMembership.notes}</p>
+                      {selectedMembership.reviewedBy && (
+                        <div className="text-sm text-muted-foreground border-t pt-3">
+                          <span className="font-medium">Reviewed by:</span> {selectedMembership.reviewedBy}
+                          {selectedMembership.reviewedAt && (
+                            <span className="ml-2">on {formatDate(selectedMembership.reviewedAt)}</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="flex justify-between items-center pt-6 border-t">
                   <Button 
                     variant="outline" 
-                    onClick={() => setShowDetailDialog(false)} 
-                    className="px-6 py-2 order-2 sm:order-1"
+                    onClick={() => setShowDetailDialog(false)}
+                    className="px-6 py-2"
                   >
                     Close
                   </Button>
-                  <div className="flex gap-3 order-1 sm:order-2">
+                  <div className="flex gap-3">
                     {selectedMembership.status !== 'approved' && (
                       <Button 
                         onClick={() => handleStatusChange(selectedMembership.id, 'approved')}
@@ -723,8 +649,9 @@ export default function MembersPage() {
                     )}
                   </div>
                 </div>
-              </div>
-            </div>
+
+              </CardContent>
+            </Card>
           )}
         </DialogContent>
       </Dialog>
