@@ -11,19 +11,41 @@ import { formatDate } from '@/lib/utils';
 import { generateMetadata as generateSEOMetadata, generateArticleSchema } from '@/lib/seo';
 import type { Metadata } from 'next';
 
+interface NewsPost {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  date: string;
+  author: string;
+  category: string;
+  tags: string[];
+  featuredImage?: string;
+}
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  return newsData.map((post) => ({
+  // Type assertion to handle empty array case
+  const typedNewsData = newsData as NewsPost[];
+  
+  if (typedNewsData.length === 0) {
+    // Return a fallback static param for empty news data
+    return [{ slug: 'no-news' }];
+  }
+  
+  return typedNewsData.map((post) => ({
     slug: post.slug,
   }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = newsData.find((post) => post.slug === slug);
+  const typedNewsData = newsData as NewsPost[];
+  const post = typedNewsData.find((post) => post.slug === slug);
 
   if (!post) {
     return {
@@ -42,9 +64,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function NewsPost({ params }: PageProps) {
   const { slug } = await params;
-  const post = newsData.find((post) => post.slug === slug);
+  const typedNewsData = newsData as NewsPost[];
+  const post = typedNewsData.find((post) => post.slug === slug);
 
-  if (!post) {
+  if (!post || slug === 'no-news') {
     notFound();
   }
 
@@ -70,7 +93,7 @@ export default async function NewsPost({ params }: PageProps) {
   };
 
   // Related posts (exclude current post)
-  const relatedPosts = newsData
+  const relatedPosts = typedNewsData
     .filter((p) => p.slug !== post.slug)
     .slice(0, 3);
 
@@ -114,7 +137,7 @@ export default async function NewsPost({ params }: PageProps) {
                 <div className="flex items-center space-x-3 mb-4">
                   <span className="inline-block bg-mm-primary/10 text-mm-primary px-3 py-1 rounded-full text-sm font-medium">
                     <Tag className="w-3 h-3 inline mr-1" />
-                    {post.tag}
+                    {post.category}
                   </span>
                   <time 
                     dateTime={post.date}
