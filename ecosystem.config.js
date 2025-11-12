@@ -2,8 +2,8 @@ module.exports = {
   apps: [
     {
       name: 'madhesh-backend',
-      script: './backend/dist/index.js',
-      cwd: '/home/zwicky/madhesh-mahasabha/backend',
+      script: './dist/index.js',  // Changed from './backend/dist/index.js'
+      cwd: '/home/zwicky/madhesh-mahasabha/backend',  // This already points to backend directory
       instances: 2,
       exec_mode: 'cluster',
       env_production: {
@@ -27,7 +27,7 @@ module.exports = {
       instances: 1,
       env_production: {
         NODE_ENV: 'production',
-        PORT: 3002
+        PORT: 3003
       },
       error_file: './logs/frontend-error.log',
       out_file: './logs/frontend-out.log',
