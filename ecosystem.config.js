@@ -21,8 +21,8 @@ module.exports = {
     },
     {
       name: 'madhesh-frontend',
-      script: 'npm',
-      args: 'start',
+      script: 'node_modules/.bin/next',
+      args: 'start -p 3003',
       cwd: '/home/zwicky/madhesh-mahasabha/frontend',
       instances: 1,
       exec_mode: 'fork',  // Changed to 'fork' for consistency
