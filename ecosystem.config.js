@@ -4,11 +4,11 @@ module.exports = {
       name: 'madhesh-backend',
       script: 'dist/index.js',
       cwd: '/home/zwicky/madhesh-mahasabha/backend',
-      instances: 2,
+      instances: 1,
       exec_mode: 'fork',  // Changed from 'cluster' to 'fork'
       env_production: {
         NODE_ENV: 'production',
-        PORT: 5002
+        PORT: 6000
       },
       error_file: 'logs/backend-error.log',
       out_file: 'logs/backend-out.log',
