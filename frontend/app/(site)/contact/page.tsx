@@ -173,9 +173,9 @@ export default function Contact() {
         <main id="main-content" className="min-h-screen flex items-center justify-center bg-gradient-to-br from-mm-primary/5 via-white to-mm-accent/5 relative overflow-hidden">
           {/* Professional background elements */}
           <div className="absolute top-0 left-0 w-full h-full">
-            <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-br from-mm-primary/10 to-transparent rounded-full blur-3xl"></div>
-            <div className="absolute bottom-20 right-20 w-[500px] h-[500px] bg-gradient-to-tl from-mm-accent/10 to-transparent rounded-full blur-3xl"></div>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-mm-primary/5 to-mm-accent/5 rounded-full blur-3xl"></div>
+            <div className="absolute top-20 left-20 w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 bg-gradient-to-br from-mm-primary/10 to-transparent rounded-full blur-3xl"></div>
+            <div className="absolute bottom-20 right-20 w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 bg-gradient-to-tl from-mm-accent/10 to-transparent rounded-full blur-3xl"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 bg-gradient-to-r from-mm-primary/5 to-mm-accent/5 rounded-full blur-3xl"></div>
           </div>
           
           <div className="max-w-3xl mx-auto text-center px-4 py-8 relative z-10">
@@ -316,8 +316,8 @@ export default function Contact() {
         {/* Hero Section */}
         <section className="relative min-h-[60vh] flex items-center overflow-hidden bg-mm-primary/5">
           {/* Decorative Elements */}
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-mm-primary/5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-mm-accent/5 rounded-full blur-3xl"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 bg-mm-primary/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 bg-mm-accent/5 rounded-full blur-3xl"></div>
           
           <div className="container-custom relative z-10 py-20">
             <div className="max-w-4xl mx-auto text-center">

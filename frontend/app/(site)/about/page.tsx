@@ -20,8 +20,8 @@ export default function About() {
       <main id="main-content">
         {/* Hero Section */}
         <Section background="pattern" className="py-20 lg:py-28 relative overflow-hidden">
-          <div className="absolute top-10 right-10 w-72 h-72 bg-mm-primary/5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-10 left-10 w-96 h-96 bg-mm-accent/5 rounded-full blur-3xl"></div>
+          <div className="absolute top-10 right-10 w-48 h-48 sm:w-64 sm:h-64 lg:w-72 lg:h-72 bg-mm-primary/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-10 left-10 w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 bg-mm-accent/5 rounded-full blur-3xl"></div>
           
           <div className="max-w-5xl mx-auto relative z-10">
             <div className="inline-flex items-center space-x-2 bg-mm-primary/10 backdrop-blur-sm border border-mm-primary/20 rounded-full px-5 py-2 mb-8">

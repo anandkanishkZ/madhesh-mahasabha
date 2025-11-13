@@ -114,8 +114,8 @@ export default function Resources() {
         {/* Hero Section */}
         <section className="relative min-h-[60vh] flex items-center overflow-hidden bg-mm-primary/5">
           {/* Decorative Elements */}
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-mm-primary/5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-mm-accent/5 rounded-full blur-3xl"></div>
+          <div className="absolute top-0 right-0 w-64 sm:w-96 lg:w-[500px] h-64 sm:h-96 lg:h-[500px] bg-mm-primary/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-64 sm:w-96 lg:w-[500px] h-64 sm:h-96 lg:h-[500px] bg-mm-accent/5 rounded-full blur-3xl"></div>
           
           <div className="container-custom relative z-10 py-20">
             <div className="max-w-4xl">

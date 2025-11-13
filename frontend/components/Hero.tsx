@@ -22,8 +22,8 @@ export function Hero() {
       <div className="absolute inset-0 bg-gradient-to-br from-mm-bg via-white to-mm-bg/50"></div>
       
       {/* Decorative Elements */}
-      <div className="absolute top-20 right-10 w-72 h-72 bg-mm-primary/5 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-20 left-10 w-96 h-96 bg-mm-accent/5 rounded-full blur-3xl"></div>
+      <div className="absolute top-20 right-0 sm:right-10 w-48 sm:w-64 lg:w-72 h-48 sm:h-64 lg:h-72 bg-mm-primary/5 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-20 left-0 sm:left-10 w-64 sm:w-80 lg:w-96 h-64 sm:h-80 lg:h-96 bg-mm-accent/5 rounded-full blur-3xl"></div>
       
       {/* Mithila Pattern Overlay */}
       <div className="absolute inset-0 mithila-pattern opacity-30"></div>

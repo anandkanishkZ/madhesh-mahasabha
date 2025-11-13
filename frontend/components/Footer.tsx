@@ -36,8 +36,8 @@ export function Footer() {
   return (
     <footer className="relative bg-mm-ink text-white overflow-hidden" role="contentinfo">
       {/* Decorative background elements */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-mm-primary/10 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-mm-accent/10 rounded-full blur-3xl"></div>
+      <div className="absolute top-0 left-0 w-64 sm:w-80 lg:w-96 h-64 sm:h-80 lg:h-96 bg-mm-primary/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 right-0 w-64 sm:w-80 lg:w-96 h-64 sm:h-80 lg:h-96 bg-mm-accent/10 rounded-full blur-3xl"></div>
       
       {/* Wave decoration at top */}
       <div className="absolute top-0 left-0 w-full overflow-hidden leading-none">
@@ -164,15 +164,15 @@ export function Footer() {
               <p className="nepali-text text-base text-gray-300 mb-4">
                 नवीनतम समाचार र अपडेटहरू प्राप्त गर्नुहोस्
               </p>
-              <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
+              <form className="flex flex-col sm:flex-row gap-2" onSubmit={(e) => e.preventDefault()}>
                 <input
                   type="email"
                   placeholder="तपाईंको इमेल"
-                  className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-mm-primary text-base"
+                  className="flex-1 w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-mm-primary text-base"
                 />
                 <button
                   type="submit"
-                  className="bg-mm-primary hover:bg-mm-primary/90 text-white px-5 py-3 rounded-lg transition-colors flex items-center gap-2"
+                  className="bg-mm-primary hover:bg-mm-primary/90 text-white px-5 py-3 rounded-lg transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
                   aria-label="सब्स्क्राइब गर्नुहोस्"
                 >
                   <ArrowRight className="w-5 h-5" />

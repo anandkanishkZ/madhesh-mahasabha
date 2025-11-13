@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { PanelLeft } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { LangToggle } from '@/components/LangToggle';
 import { LeftSlider } from '@/components/LeftSlider';
 import { useLeftSliderContext } from '@/contexts/LeftSliderContext';
 import { cn } from '@/lib/utils';
@@ -140,7 +139,6 @@ export function Header() {
 
             {/* Desktop CTAs */}
             <div className="hidden lg:flex items-center space-x-4">
-              <LangToggle />
               <Button variant="outline" size="sm" asChild>
                 <Link href="/manifesto">प्रस्तावना</Link>
               </Button>

@@ -55,8 +55,8 @@ export default function Agenda() {
         {/* Hero Section */}
         <Section className="py-16 lg:py-24 bg-gradient-to-br from-mm-primary/5 via-white to-mm-accent/5 relative overflow-hidden">
           {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-96 h-96 bg-mm-primary/5 rounded-full blur-3xl -z-0"></div>
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-mm-accent/5 rounded-full blur-3xl -z-0"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 bg-mm-primary/5 rounded-full blur-3xl -z-0"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 bg-mm-accent/5 rounded-full blur-3xl -z-0"></div>
           
           <div className="max-w-5xl mx-auto text-center relative z-10">
             <div className="inline-block mb-6">
@@ -255,8 +255,8 @@ export default function Agenda() {
           <div className="max-w-4xl mx-auto">
             <div className="bg-mm-primary rounded-3xl p-8 lg:p-12 text-white relative overflow-hidden">
               {/* Decorative circles */}
-              <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full"></div>
-              <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white/10 rounded-full"></div>
+              <div className="absolute -top-10 -right-10 w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 bg-white/10 rounded-full"></div>
+              <div className="absolute -bottom-10 -left-10 w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 bg-white/10 rounded-full"></div>
               
               <div className="relative z-10 text-center">
                 <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6 backdrop-blur-sm">

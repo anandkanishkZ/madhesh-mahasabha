@@ -205,8 +205,8 @@ export default function JoinPage() {
       <>
         <main id="main-content" className="min-h-screen flex items-center justify-center bg-green-50 relative overflow-hidden">
           {/* Animated background circles */}
-          <div className="absolute top-20 left-20 w-72 h-72 bg-green-200/30 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-mm-primary/20 rounded-full blur-3xl animate-pulse delay-700"></div>
+          <div className="absolute top-20 left-20 w-48 h-48 sm:w-64 sm:h-64 lg:w-72 lg:h-72 bg-green-200/30 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-20 w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 bg-mm-primary/20 rounded-full blur-3xl animate-pulse delay-700"></div>
           
           <div className="max-w-2xl mx-auto text-center px-4 relative z-10">
             {/* Success Icon with animation */}
@@ -277,8 +277,8 @@ export default function JoinPage() {
         <section className="relative min-h-[80vh] flex items-center overflow-hidden">
           {/* Animated background */}
           <div className="absolute inset-0 bg-mm-primary/5"></div>
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-mm-primary/5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-mm-accent/5 rounded-full blur-3xl"></div>
+          <div className="absolute top-0 right-0 w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 bg-mm-primary/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 bg-mm-accent/5 rounded-full blur-3xl"></div>
           
           <div className="container-custom relative z-10 py-20">
             <div className="max-w-6xl mx-auto text-center">

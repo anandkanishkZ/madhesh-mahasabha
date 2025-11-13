@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { LangToggle } from '@/components/LangToggle';
 import { useLeftSliderContext } from '@/contexts/LeftSliderContext';
 import { cn } from '@/lib/utils';
 
@@ -21,8 +20,10 @@ const navigation = [
   { name: 'कार्यसूची', name_en: 'Agenda', href: '/agenda' },
   { name: 'सदस्यता', name_en: 'Join', href: '/join' },
   { name: 'समाचार', name_en: 'News', href: '/news' },
+  { name: 'प्रेस विज्ञप्ति', name_en: 'Press Releases', href: '/press-releases' },
   { name: 'संसाधन', name_en: 'Resources', href: '/resources' },
   { name: 'सम्पर्क', name_en: 'Contact', href: '/contact' },
+  { name: 'मिसन प्रतिनिधिसभा', name_en: 'Mission Representative', href: '/mission-representative', special: true },
 ];
 
 export function LeftSlider({ title, children }: LeftSliderProps) {
@@ -66,18 +67,19 @@ export function LeftSlider({ title, children }: LeftSliderProps) {
                 onClick={closeSlider}
                 className={cn(
                   "block px-4 py-3 rounded-lg font-nepali-sidebar text-lg font-medium transition-colors duration-200",
-                  pathname === item.href
-                    ? "bg-mm-primary text-white"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-mm-primary"
+                  item.special
+                    ? (pathname === item.href 
+                        ? "bg-amber-600 text-white font-semibold"
+                        : "bg-amber-500 text-white hover:bg-amber-600 font-semibold")
+                    : (pathname === item.href
+                        ? "bg-mm-primary text-white"
+                        : "text-gray-700 hover:bg-gray-100 hover:text-mm-primary")
                 )}
               >
                 {item.name}
               </Link>
             ))}
           </nav>
-          <div className="px-6 py-4 border-t border-gray-200">
-            <LangToggle />
-          </div>
           {children && (
             <div className="px-6 py-4 border-t border-gray-200">
               {children}

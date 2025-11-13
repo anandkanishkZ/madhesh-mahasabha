@@ -6,6 +6,7 @@
 html, body {
   overflow-x: hidden;
   max-width: 100vw;
+  width: 100%;
   position: relative;
 }
 
@@ -23,6 +24,11 @@ html, body {
 [style*="position: fixed"], [style*="position: absolute"], 
 .fixed, .absolute {
   max-width: 100vw;
+}
+
+/* Ensure buttons don't overflow on mobile */
+button[class*="fixed"] {
+  max-width: calc(100vw - 2rem);
 }
 
 :root {

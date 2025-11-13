@@ -40,8 +40,8 @@ export function BackToTop() {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={`
-        fixed bottom-20 right-6 z-50 
-        w-14 h-14 
+        fixed bottom-20 z-50 
+        w-12 h-12 sm:w-14 sm:h-14
         rounded-full 
         bg-mm-primary
         hover:bg-mm-secondary
@@ -58,6 +58,7 @@ export function BackToTop() {
         group
         ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0'}
       `}
+      style={{ right: 'max(1rem, min(1.5rem, calc(100vw - 100% + 1rem)))' }}
       aria-label="Back to top"
       title="माथि जानुहोस्"
     >
@@ -68,7 +69,7 @@ export function BackToTop() {
       <div className="relative z-10 flex items-center justify-center w-full h-full">
         <ArrowUp 
           className={`
-            w-6 h-6 
+            w-5 h-5 sm:w-6 sm:h-6
             text-white 
             stroke-[2.5]
             transition-all duration-300
