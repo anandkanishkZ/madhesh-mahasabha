@@ -17,7 +17,8 @@ import {
   X,
   Search,
   ExternalLink,
-  Megaphone
+  Megaphone,
+  Image as ImageLib
 } from 'lucide-react';
 import { isAuthenticated, logout } from '@/lib/api';
 
@@ -75,6 +76,12 @@ export default function DashboardLayout({
       label: 'Press Releases',
       description: 'Announcements',
       icon: Megaphone,
+    },
+    {
+      href: '/dashboard/media',
+      label: 'Media Library',
+      description: 'Files & Images',
+      icon: ImageLib,
     },
     {
       href: '/dashboard/settings',

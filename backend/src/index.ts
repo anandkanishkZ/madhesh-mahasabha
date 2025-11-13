@@ -11,6 +11,7 @@ import membershipRoutes from './routes/membership.routes';
 import newsRoutes from './routes/news.routes';
 import pressReleaseRoutes from './routes/press-release.routes';
 import uploadRoutes from './routes/upload.routes';
+import mediaRoutes from './routes/media.routes';
 import { errorHandler } from './middleware/error.middleware';
 import { logger } from './middleware/logger.middleware';
 import { generalLimiter } from './middleware/rate-limit.middleware';
@@ -42,8 +43,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Logger Middleware
 app.use(logger);
 
-// Serve static files from uploads directory
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Serve static files from uploads directory (ONLY for mission-representatives, not media)
+// Media files are served through authenticated API endpoint for security
+app.use('/uploads/mission-representatives', express.static(path.join(__dirname, '../uploads/mission-representatives')));
 
 // Health Check
 app.get('/health', (_req, res) => {
@@ -64,6 +66,7 @@ app.use('/api/memberships', membershipRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/press-releases', pressReleaseRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/media', mediaRoutes);
 
 // 404 Handler
 app.use((req, res) => {

@@ -227,6 +227,59 @@ model PressRelease {
   @@index([category, isPublished, isDeleted]) // Composite index for filtered queries
 }
 
+// Media Library - For file management
+model Media {
+  id            String   @id @default(cuid())
+  
+  // File Information
+  filename      String   // Original filename
+  storedName    String   @unique // Stored filename on disk
+  filepath      String   // Relative path from uploads directory
+  url           String   // Full URL to access the file
+  mimeType      String   // MIME type (image/jpeg, application/pdf, etc.)
+  size          Int      // File size in bytes
+  
+  // Image-specific metadata (null for non-images)
+  width         Int?
+  height        Int?
+  
+  // Media Metadata
+  title         String?
+  altText       String?
+  caption       String?  @db.Text
+  description   String?  @db.Text
+  
+  // Categorization
+  category      String   @default("uncategorized") // image, document, video, audio, other
+  folder        String?  // Optional folder organization
+  tags          String[] // Array of tags for better organization
+  
+  // Usage tracking
+  usageCount    Int      @default(0) // How many times this media is referenced
+  
+  // Uploader information
+  uploadedBy    String   // Admin ID who uploaded
+  uploadedByName String? // Admin name for quick reference
+  
+  // Soft Delete
+  isDeleted     Boolean  @default(false)
+  deletedAt     DateTime?
+  deletedBy     String?
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@map("media")
+  @@index([category])
+  @@index([mimeType])
+  @@index([uploadedBy])
+  @@index([isDeleted])
+  @@index([createdAt])
+  @@index([category, isDeleted]) // Composite index for filtering
+  @@index([folder, isDeleted]) // Composite index for folder-based queries
+}
+
 // Activity Logs - For audit trail
 model ActivityLog {
   id          String   @id @default(cuid())

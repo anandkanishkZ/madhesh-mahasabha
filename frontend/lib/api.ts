@@ -69,6 +69,18 @@ export function removeAuthToken(): void {
 }
 
 /**
+ * Create authenticated URL with token query parameter
+ * Used for browser direct access (opening images in new tabs)
+ */
+export function getAuthenticatedUrl(url: string): string {
+  const token = getAuthToken();
+  if (!token) return url;
+  
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}token=${encodeURIComponent(token)}`;
+}
+
+/**
  * Make API request with error handling
  */
 async function apiRequest<T = any>(
@@ -386,22 +398,38 @@ export function getAuthenticatedFileUrl(filePath: string | undefined | null): st
 export async function fetchAuthenticatedFile(filePath: string): Promise<string | null> {
   try {
     const token = getAuthToken();
-    if (!token) return null;
-
-    const filename = filePath.split('/').pop();
-    if (!filename) return null;
+    if (!token) {
+      console.error('No auth token found');
+      return null;
+    }
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-    const response = await fetch(`${API_URL}/api/upload/mission-representatives/${filename}`, {
+    
+    // Handle both old format (/path/to/file.jpg) and new format (/api/media/file/filename.jpg)
+    let fetchUrl = filePath;
+    
+    // If it's a relative path, make it absolute
+    if (filePath.startsWith('/')) {
+      fetchUrl = `${API_URL}${filePath}`;
+    }
+    
+    console.log('🖼️ Fetching authenticated file:', fetchUrl);
+    
+    const response = await fetch(fetchUrl, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.error('File fetch failed:', response.status, response.statusText);
+      return null;
+    }
 
     const blob = await response.blob();
-    return URL.createObjectURL(blob);
+    const objectUrl = URL.createObjectURL(blob);
+    console.log('✅ File loaded successfully');
+    return objectUrl;
   } catch (error) {
     console.error('Error fetching authenticated file:', error);
     return null;
@@ -785,5 +813,241 @@ export async function deletePressRelease(id: string): Promise<ApiResponse> {
 export async function getPressReleaseMetadata(): Promise<ApiResponse> {
   return apiRequest('/api/press-releases/meta/categories', {
     method: 'GET',
+  });
+}
+
+// ========================================
+// Media Management API
+// ========================================
+
+export interface Media {
+  id: string;
+  filename: string;
+  storedName: string;
+  filepath: string;
+  url: string;
+  mimeType: string;
+  size: number;
+  width?: number;
+  height?: number;
+  title?: string;
+  altText?: string;
+  caption?: string;
+  description?: string;
+  category: string;
+  folder?: string;
+  tags: string[];
+  usageCount: number;
+  uploadedBy: string;
+  uploadedByName?: string;
+  isDeleted: boolean;
+  deletedAt?: string;
+  deletedBy?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MediaUploadOptions {
+  title?: string;
+  altText?: string;
+  caption?: string;
+  description?: string;
+  folder?: string;
+  tags?: string[];
+}
+
+/**
+ * Upload a single media file
+ */
+export async function uploadMedia(
+  file: File,
+  options?: MediaUploadOptions
+): Promise<ApiResponse<Media>> {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  if (options?.title) formData.append('title', options.title);
+  if (options?.altText) formData.append('altText', options.altText);
+  if (options?.caption) formData.append('caption', options.caption);
+  if (options?.description) formData.append('description', options.description);
+  if (options?.folder) formData.append('folder', options.folder);
+  if (options?.tags) formData.append('tags', JSON.stringify(options.tags));
+
+  const token = getAuthToken();
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/media/upload`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: data.message || data.error || 'Upload failed',
+      };
+    }
+
+    return {
+      success: true,
+      data: data.data,
+      message: data.message,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Upload failed',
+    };
+  }
+}
+
+/**
+ * Upload multiple media files
+ */
+export async function uploadMultipleMedia(
+  files: File[],
+  options?: { folder?: string; tags?: string[] }
+): Promise<ApiResponse<Media[]>> {
+  const formData = new FormData();
+  
+  files.forEach(file => {
+    formData.append('files', file);
+  });
+  
+  if (options?.folder) formData.append('folder', options.folder);
+  if (options?.tags) formData.append('tags', JSON.stringify(options.tags));
+
+  const token = getAuthToken();
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/media/upload-multiple`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: data.message || data.error || 'Upload failed',
+      };
+    }
+
+    return {
+      success: true,
+      data: data.data,
+      message: data.message,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Upload failed',
+    };
+  }
+}
+
+/**
+ * Get all media with filtering and pagination
+ */
+export async function getMedia(params?: {
+  category?: string;
+  folder?: string;
+  search?: string;
+  tags?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  includeDeleted?: boolean;
+}): Promise<ApiResponse<{ media: Media[]; pagination: any }>> {
+  const queryParams = new URLSearchParams();
+  
+  if (params?.category) queryParams.append('category', params.category);
+  if (params?.folder) queryParams.append('folder', params.folder);
+  if (params?.search) queryParams.append('search', params.search);
+  if (params?.tags) queryParams.append('tags', params.tags);
+  if (params?.page) queryParams.append('page', params.page.toString());
+  if (params?.limit) queryParams.append('limit', params.limit.toString());
+  if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+  if (params?.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+  if (params?.includeDeleted) queryParams.append('includeDeleted', 'true');
+
+  return apiRequest(`/api/media?${queryParams.toString()}`, {
+    method: 'GET',
+  });
+}
+
+/**
+ * Get media statistics
+ */
+export async function getMediaStats(): Promise<ApiResponse<{
+  totalMedia: number;
+  totalImages: number;
+  totalDocuments: number;
+  totalSize: number;
+  deletedCount: number;
+}>> {
+  return apiRequest('/api/media/stats', {
+    method: 'GET',
+  });
+}
+
+/**
+ * Get single media item
+ */
+export async function getMediaById(id: string): Promise<ApiResponse<Media>> {
+  return apiRequest(`/api/media/${id}`, {
+    method: 'GET',
+  });
+}
+
+/**
+ * Update media metadata
+ */
+export async function updateMedia(
+  id: string,
+  data: Partial<MediaUploadOptions>
+): Promise<ApiResponse<Media>> {
+  return apiRequest(`/api/media/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * Delete media (soft delete - move to trash)
+ */
+export async function deleteMedia(id: string, permanent: boolean = false): Promise<ApiResponse> {
+  const queryParams = permanent ? '?permanent=true' : '';
+  return apiRequest(`/api/media/${id}${queryParams}`, {
+    method: 'DELETE',
+  });
+}
+
+/**
+ * Restore media from trash
+ */
+export async function restoreMedia(id: string): Promise<ApiResponse<Media>> {
+  return apiRequest(`/api/media/${id}/restore`, {
+    method: 'POST',
+  });
+}
+
+/**
+ * Bulk delete media
+ */
+export async function bulkDeleteMedia(ids: string[]): Promise<ApiResponse> {
+  return apiRequest('/api/media/bulk-delete', {
+    method: 'POST',
+    body: JSON.stringify({ ids }),
   });
 }
