@@ -20,6 +20,10 @@ import { notFound } from 'next/navigation';
 import { PressReleaseShare, PressReleaseShareSection } from '@/components/PressReleaseShare';
 import { getPressReleases, getPressReleaseBySlug, type PressRelease } from '@/lib/api';
 
+// Force dynamic rendering to always fetch fresh data
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return new Intl.DateTimeFormat('ne-NP', { 

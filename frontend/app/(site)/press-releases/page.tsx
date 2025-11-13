@@ -23,6 +23,10 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { getPressReleases, type PressRelease } from '@/lib/api';
 
+// Force dynamic rendering to always fetch fresh data
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata: Metadata = generateMetadata({
   title: 'प्रेस विज्ञप्ति',
   description: 'मधेश महासभाका आधिकारिक प्रेस विज्ञप्ति, घोषणा र वक्तव्यहरू।',
