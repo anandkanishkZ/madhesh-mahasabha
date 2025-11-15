@@ -507,11 +507,11 @@ export default function MissionRepresentativesPage() {
                           }}
                           className="block relative group cursor-pointer w-full"
                         >
-                          <div className="h-64 w-full overflow-hidden rounded-md border border-gray-200">
+                          <div className="relative h-64 w-full overflow-hidden rounded-md border border-gray-200">
                             <AuthenticatedImage
                               filePath={selectedRep.photoUrl}
                               alt="Applicant Photo"
-                              className="w-full h-full object-contain"
+                              className="absolute inset-0 w-full h-full object-contain"
                               fallbackText="Photo not available"
                             />
                           </div>
@@ -562,13 +562,13 @@ export default function MissionRepresentativesPage() {
                               const imageUrl = await fetchAuthenticatedFile(selectedRep.citizenshipUrl);
                               if (imageUrl) window.open(imageUrl, '_blank');
                             }}
-                            className="block relative group cursor-pointer w-full"
+                            className="block relative group cursor-pointer w-full flex-shrink-0"
                           >
-                            <div className="h-64 w-full overflow-hidden rounded-md border border-gray-200">
+                            <div className="relative h-64 w-full overflow-hidden rounded-md border border-gray-200">
                               <AuthenticatedImage
                                 filePath={selectedRep.citizenshipUrl}
                                 alt="Citizenship Document"
-                                className="w-full h-full object-contain"
+                                className="absolute inset-0 w-full h-full object-contain"
                                 fallbackText="Document not available"
                               />
                             </div>
@@ -622,11 +622,11 @@ export default function MissionRepresentativesPage() {
                             }}
                             className="block relative group cursor-pointer w-full"
                           >
-                            <div className="h-64 w-full overflow-hidden rounded-md border border-gray-200">
+                            <div className="relative h-64 w-full overflow-hidden rounded-md border border-gray-200">
                               <AuthenticatedImage
                                 filePath={selectedRep.educationCertUrl}
                                 alt="Education Certificate"
-                                className="w-full h-full object-contain"
+                                className="absolute inset-0 w-full h-full object-contain"
                                 fallbackText="Certificate not available"
                               />
                             </div>

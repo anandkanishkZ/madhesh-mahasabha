@@ -24,13 +24,18 @@ const env = validateEnv();
 const app: Application = express();
 const PORT = env.PORT || 5000;
 
-// Security Middleware
-app.use(helmet());
+// CORS Middleware (MUST be before helmet)
 app.use(cors({
   origin: env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Security Middleware
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false // Allow embedding from cross-origin
 }));
 
 // General Rate Limiting for all API routes

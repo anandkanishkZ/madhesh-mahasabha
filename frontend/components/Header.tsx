@@ -75,7 +75,6 @@ export function Header() {
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center space-x-1">
               {navigation.map((item) => {
-                // Handle trailing slash - normalize both pathname and href
                 const normalizedPathname = pathname.endsWith('/') && pathname !== '/' 
                   ? pathname.slice(0, -1) 
                   : pathname;
@@ -83,11 +82,6 @@ export function Header() {
                   ? item.href.slice(0, -1) 
                   : item.href;
                 const isActive = normalizedPathname === normalizedHref;
-                
-                // Debug logging
-                if (typeof window !== 'undefined') {
-                  console.log(`[Header Debug] Item: ${item.name}, href: ${normalizedHref}, pathname: ${normalizedPathname}, isActive: ${isActive}`);
-                }
                 
                 return (
                   <Link
@@ -147,16 +141,15 @@ export function Header() {
               </Button>
             </div>
 
-            {/* Mobile LeftSlider button only */}
-            <div className="flex items-center space-x-2 lg:hidden">
-              {/* Left Slider Toggle - Mobile */}
+            {/* Mobile Menu Button */}
+            <div className="flex items-center lg:hidden">
               <button
                 type="button"
                 onClick={openSlider}
-                className="p-2 rounded-lg text-gray-700 hover:text-mm-primary hover:bg-mm-primary/10 transition-all duration-300 focus-ring hover-scale hover-glow"
+                className="p-2.5 rounded-lg text-gray-700 hover:text-mm-primary hover:bg-mm-primary/10 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-mm-primary focus:ring-offset-2 active:scale-95"
                 aria-label="द्रुत पहुँच मेनु खोल्नुहोस्"
               >
-                <PanelLeft className="w-5 h-5" />
+                <PanelLeft className="w-6 h-6" />
               </button>
             </div>
           </div>

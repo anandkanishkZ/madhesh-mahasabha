@@ -15,10 +15,13 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { ArrowLeft, Save, Eye, Megaphone, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Megaphone, AlertCircle, ImagePlus, X } from 'lucide-react';
 import Link from 'next/link';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { MediaPicker } from '@/components/MediaPicker';
+import AuthenticatedImage from '@/components/AuthenticatedImage';
+import type { Media } from '@/lib/api';
 
 export default function CreatePressReleasePage() {
   const router = useRouter();
@@ -46,6 +49,7 @@ export default function CreatePressReleasePage() {
   });
 
   const [tagInput, setTagInput] = useState('');
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
 
   const generateSlug = (title: string) => {
     return title
@@ -299,17 +303,57 @@ export default function CreatePressReleasePage() {
               <CardTitle className="nepali-heading">Media & Tags</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Image URL */}
+              {/* Featured Image */}
               <div>
-                <Label htmlFor="imageUrl">Featured Image URL</Label>
-                <Input
-                  id="imageUrl"
-                  type="url"
-                  value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  placeholder="https://example.com/image.jpg"
-                  className="mt-1.5"
-                />
+                <Label>Featured Image</Label>
+                <div className="mt-1.5 space-y-3">
+                  {formData.imageUrl ? (
+                    <div className="relative group">
+                      <div className="relative aspect-video w-full max-w-md overflow-hidden rounded-lg border-2 border-gray-200">
+                        {/* Using AuthenticatedImage for consistent image loading */}
+                        <AuthenticatedImage
+                          filePath={formData.imageUrl}
+                          alt="Featured image"
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, imageUrl: '' })}
+                        className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg"
+                        title="Remove image"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="aspect-video w-full max-w-md flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+                      <div className="text-center">
+                        <ImagePlus className="w-12 h-12 mx-auto text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-500">No image selected</p>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowMediaPicker(true)}
+                      className="flex-1 max-w-xs"
+                    >
+                      <ImagePlus className="w-4 h-4 mr-2" />
+                      {formData.imageUrl ? 'Change Image' : 'Select Image'}
+                    </Button>
+                  </div>
+                  <Input
+                    id="imageUrl"
+                    type="url"
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    placeholder="Or paste image URL directly"
+                    className="max-w-md"
+                  />
+                </div>
               </div>
 
               {/* Tags */}
@@ -434,6 +478,23 @@ export default function CreatePressReleasePage() {
           </div>
         </div>
       </form>
+
+      {/* Media Picker Modal */}
+      <MediaPicker
+        open={showMediaPicker}
+        onClose={() => setShowMediaPicker(false)}
+        onSelect={(media) => {
+          const selectedMedia = Array.isArray(media) ? media[0] : media;
+          if (selectedMedia) {
+            setFormData({ ...formData, imageUrl: selectedMedia.url });
+          }
+          setShowMediaPicker(false);
+        }}
+        multiple={false}
+        allowedTypes={['image']}
+        title="Select Featured Image"
+        description="Choose an image from your media library"
+      />
     </div>
   );
 }

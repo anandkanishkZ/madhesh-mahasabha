@@ -180,8 +180,12 @@ export function MediaPicker({
     try {
       setUploading(true);
 
+      // Determine folder based on category filter or default to 'general'
+      const uploadFolder = categoryFilter !== 'all' ? categoryFilter : 'general';
+
       if (uploadFiles.length === 1) {
-        const response = await uploadMedia(uploadFiles[0]);
+        const response = await uploadMedia(uploadFiles[0], { folder: uploadFolder });
+        console.log('Upload response:', response); // Debug logging
         if (response.success && response.data) {
           toast({
             title: 'Success',
@@ -191,10 +195,13 @@ export function MediaPicker({
           setActiveTab('library');
           fetchMedia();
         } else {
-          throw new Error(response.error || 'Upload failed');
+          const errorMsg = response.error || 'Upload failed';
+          console.error('Upload failed:', errorMsg, response); // More detailed error
+          throw new Error(errorMsg);
         }
       } else {
-        const response = await uploadMultipleMedia(uploadFiles);
+        const response = await uploadMultipleMedia(uploadFiles, { folder: uploadFolder });
+        console.log('Multiple upload response:', response); // Debug logging
         if (response.success && response.data) {
           toast({
             title: 'Success',
@@ -204,7 +211,9 @@ export function MediaPicker({
           setActiveTab('library');
           fetchMedia();
         } else {
-          throw new Error(response.error || 'Upload failed');
+          const errorMsg = response.error || 'Upload failed';
+          console.error('Upload failed:', errorMsg, response); // More detailed error
+          throw new Error(errorMsg);
         }
       }
     } catch (error) {

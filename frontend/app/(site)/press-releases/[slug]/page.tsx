@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { notFound } from 'next/navigation';
 import { PressReleaseShare, PressReleaseShareSection } from '@/components/PressReleaseShare';
 import { getPressReleases, getPressReleaseBySlug, type PressRelease } from '@/lib/api';
+import AuthenticatedImage from '@/components/AuthenticatedImage';
 
 // Force dynamic rendering to always fetch fresh data
 export const dynamic = 'force-dynamic';
@@ -188,27 +189,31 @@ export default async function PressReleasePage({ params }: { params: Promise<{ s
                     <Eye className="w-4 h-4 text-blue-500" />
                     <span>{release.viewCount} views</span>
                   </div>
+                </div>
+                
+                {/* Share Buttons */}
+                <PressReleaseShare 
+                  title={release.titleNp}
+                  excerpt={release.excerptNp || release.titleNp}
+                />
               </div>
-              
-              {/* Share Buttons */}
-              <PressReleaseShare 
-                title={release.titleNp}
-                excerpt={release.excerptNp || release.titleNp}
-              />
-            </div>
-          </header>
+            </header>
+          </div>
         </div>
-      </div>        {/* Main Content */}
+
+        {/* Main Content */}
         <div className="py-8 sm:py-12 px-4 sm:px-[4%] md:px-[7%]">
           <article className="max-w-4xl mx-auto">
             {/* Featured Image */}
             {release.imageUrl && (
               <div className="mb-8 sm:mb-12">
                 <div className="relative aspect-video bg-gray-100 rounded-2xl overflow-hidden shadow-lg">
-                  <img
-                    src={release.imageUrl}
+                  {/* Using AuthenticatedImage for consistent image loading with auth */}
+                  {/* TODO: Replace with Next.js Image component after configuring image domains */}
+                  <AuthenticatedImage
+                    filePath={release.imageUrl}
                     alt={release.titleNp}
-                    className="w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover"
                   />
                 </div>
               </div>

@@ -2,7 +2,15 @@
  * API Client for Backend Communication
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+// Centralized API base URL - single source of truth
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+/**
+ * Get the API base URL (exported for use in components)
+ */
+export function getApiBaseUrl(): string {
+  return API_BASE_URL;
+}
 
 interface ApiResponse<T = any> {
   success: boolean;
@@ -353,11 +361,9 @@ export async function uploadMissionRepresentativeFiles(files: {
   if (files.educationCert) {
     formData.append('educationCert', files.educationCert);
   }
-
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
   
   try {
-    const response = await fetch(`${API_URL}/api/upload/mission-representative`, {
+    const response = await fetch(`${API_BASE_URL}/api/upload/mission-representative`, {
       method: 'POST',
       body: formData,
       // Note: Don't set Content-Type header, browser will set it automatically with boundary
@@ -388,8 +394,39 @@ export function getAuthenticatedFileUrl(filePath: string | undefined | null): st
   const filename = filePath.split('/').pop();
   if (!filename) return null;
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-  return `${API_URL}/api/upload/mission-representatives/${filename}`;
+  return `${API_BASE_URL}/api/upload/mission-representatives/${filename}`;
+}
+
+/**
+ * Fetch public file (no authentication required)
+ */
+export async function fetchPublicFile(filePath: string): Promise<string | null> {
+  try {
+    // Handle both old format (/path/to/file.jpg) and new format (/api/media/file/filename.jpg)
+    let fetchUrl = filePath;
+    
+    // If it's a relative path, make it absolute
+    if (filePath.startsWith('/')) {
+      fetchUrl = `${API_BASE_URL}${filePath}`;
+    }
+    
+    console.log('🖼️ Fetching public file:', fetchUrl);
+    
+    const response = await fetch(fetchUrl);
+
+    if (!response.ok) {
+      console.error('Public file fetch failed:', response.status, response.statusText);
+      return null;
+    }
+
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    console.log('✅ Public file loaded successfully');
+    return objectUrl;
+  } catch (error) {
+    console.error('Error fetching public file:', error);
+    return null;
+  }
 }
 
 /**
@@ -402,15 +439,13 @@ export async function fetchAuthenticatedFile(filePath: string): Promise<string |
       console.error('No auth token found');
       return null;
     }
-
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
     
     // Handle both old format (/path/to/file.jpg) and new format (/api/media/file/filename.jpg)
     let fetchUrl = filePath;
     
     // If it's a relative path, make it absolute
     if (filePath.startsWith('/')) {
-      fetchUrl = `${API_URL}${filePath}`;
+      fetchUrl = `${API_BASE_URL}${filePath}`;
     }
     
     console.log('🖼️ Fetching authenticated file:', fetchUrl);

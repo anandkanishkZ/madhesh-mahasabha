@@ -105,6 +105,10 @@ router.post('/upload', authenticate, upload.single('file'), async (req: Request,
     const file = req.file;
     const user = (req as any).user;
 
+    console.log('📤 Upload request received');
+    console.log('File:', file ? file.originalname : 'No file');
+    console.log('User:', user ? { id: user.id, name: user.name } : 'No user');
+
     if (!file) {
       res.status(400).json({
         success: false,
@@ -113,14 +117,29 @@ router.post('/upload', authenticate, upload.single('file'), async (req: Request,
       return;
     }
 
+    if (!user || !user.id) {
+      console.error('❌ No authenticated user found');
+      res.status(401).json({
+        success: false,
+        message: 'User not authenticated'
+      });
+      return;
+    }
+
     // Get image dimensions if it's an image
     let dimensions: { width: number; height: number } | null = null;
     if (file.mimetype.startsWith('image/')) {
-      dimensions = await getImageDimensions(file.path);
+      try {
+        dimensions = await getImageDimensions(file.path);
+      } catch (dimError) {
+        console.warn('⚠️  Failed to get image dimensions:', dimError);
+      }
     }
 
     // Get metadata from request body
     const { title, altText, caption, description, folder, tags } = req.body;
+
+    console.log('📝 Creating media record...');
 
     // Create media record in database
     const media = await prisma.media.create({
@@ -128,7 +147,8 @@ router.post('/upload', authenticate, upload.single('file'), async (req: Request,
         filename: file.originalname,
         storedName: file.filename,
         filepath: `/media/${file.filename}`,
-        url: `${process.env.BACKEND_URL || 'http://localhost:5000'}/uploads/media/${file.filename}`,
+        // Store API endpoint URL instead of static file path for secure access
+        url: `/api/media/file/${file.filename}`,
         mimeType: file.mimetype,
         size: file.size,
         width: dimensions?.width,
@@ -141,9 +161,11 @@ router.post('/upload', authenticate, upload.single('file'), async (req: Request,
         folder: folder || null,
         tags: tags ? (Array.isArray(tags) ? tags : JSON.parse(tags)) : [],
         uploadedBy: user.id,
-        uploadedByName: user.name,
+        uploadedByName: user.name || 'Admin',
       }
     });
+
+    console.log('✅ Media uploaded successfully:', media.id);
 
     res.status(201).json({
       success: true,
@@ -151,10 +173,12 @@ router.post('/upload', authenticate, upload.single('file'), async (req: Request,
       data: media
     });
   } catch (error) {
-    console.error('Error uploading file:', error);
+    console.error('❌ Error uploading file:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     res.status(500).json({
       success: false,
-      message: 'Failed to upload file'
+      message: 'Failed to upload file',
+      error: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
@@ -191,7 +215,8 @@ router.post('/upload-multiple', authenticate, upload.array('files', 10), async (
             filename: file.originalname,
             storedName: file.filename,
             filepath: `/media/${file.filename}`,
-            url: `${process.env.BACKEND_URL || 'http://localhost:5000'}/uploads/media/${file.filename}`,
+            // Store API endpoint URL instead of static file path for secure access
+            url: `/api/media/file/${file.filename}`,
             mimeType: file.mimetype,
             size: file.size,
             width: dimensions?.width,
@@ -551,47 +576,20 @@ router.post('/bulk-delete', authenticate, async (req: Request, res: Response) =>
 
 /**
  * GET /api/media/file/:filename
- * Serve media file with authentication (secure access)
+ * Serve media file with CORS headers (public access, no auth required)
  */
-// Middleware to authenticate via header OR query parameter
-const authenticateFlexible = async (req: Request, res: Response, next: any) => {
-  try {
-    // Try header-based auth first (for API calls)
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      return authenticate(req, res, next);
-    }
 
-    // Try query parameter auth (for browser direct access)
-    const token = req.query.token as string;
-    if (token) {
-      try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
-        (req as any).user = decoded;
-        return next();
-      } catch (error) {
-        res.status(401).json({
-          success: false,
-          message: 'Invalid token'
-        });
-        return;
-      }
-    }
+// Handle preflight OPTIONS request
+router.options('/file/:filename', (req: Request, res: Response) => {
+  res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
+  res.status(204).send();
+});
 
-    // No auth provided
-    res.status(401).json({
-      success: false,
-      message: 'No authorization token provided'
-    });
-  } catch (error) {
-    res.status(401).json({
-      success: false,
-      message: 'Authentication failed'
-    });
-  }
-};
-
-router.get('/file/:filename', authenticateFlexible, async (req: Request, res: Response) => {
+router.get('/file/:filename', async (req: Request, res: Response) => {
   try {
     const { filename } = req.params;
     console.log('📥 Media file request:', filename);
@@ -638,10 +636,17 @@ router.get('/file/:filename', authenticateFlexible, async (req: Request, res: Re
 
     console.log('✅ Sending file:', media.mimeType);
 
-    // Set appropriate headers
+    // Set CORS headers explicitly for image responses
+    res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:3000');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    
+    // Set appropriate content headers
     res.setHeader('Content-Type', media.mimeType);
     res.setHeader('Content-Disposition', `inline; filename="${media.filename}"`);
-    res.setHeader('Cache-Control', 'private, max-age=3600'); // Cache for 1 hour
+    res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
 
     // Send file
     res.sendFile(filePath);

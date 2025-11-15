@@ -1,205 +1,352 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import {
-  getMedia,
-  getMediaStats,
-  deleteMedia,
-  restoreMedia,
-  bulkDeleteMedia,
-  updateMedia,
-  uploadMedia,
-  uploadMultipleMedia,
-  getAuthenticatedUrl,
-  Media,
-} from '@/lib/api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   Upload,
-  Search,
-  Grid3x3,
-  List,
   Image as ImageIcon,
-  FileText,
-  Film,
-  Music,
+  File,
+  Search,
+  Grid,
+  List,
   Trash2,
-  Edit,
-  Download,
   Eye,
-  Check,
-  X,
-  Loader2,
-  RefreshCw,
-  HardDrive,
-  FolderOpen,
+  Download,
   Filter,
+  FolderOpen,
+  Plus,
+  MoreVertical,
+  Calendar,
+  HardDrive
 } from 'lucide-react';
-import { formatBytes } from '@/lib/utils';
+import { 
+  getMedia, 
+  uploadMultipleMedia, 
+  deleteMedia as deleteMediaApi,
+  getAuthToken,
+  isAuthenticated,
+  getApiBaseUrl,
+  type Media 
+} from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import AuthenticatedImage from '@/components/AuthenticatedImage';
 
-export default function MediaPage() {
-  const { toast } = useToast();
-  const [media, setMedia] = useState<Media[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<any>(null);
-  
-  // View and filter state
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [showDeleted, setShowDeleted] = useState(false);
-  
-  // Selection state
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [selectMode, setSelectMode] = useState(false);
-  
-  // Upload state
-  const [uploading, setUploading] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
-  
-  // Edit dialog state
-  const [editingMedia, setEditingMedia] = useState<Media | null>(null);
-  const [editForm, setEditForm] = useState({
-    title: '',
-    altText: '',
-    caption: '',
-    description: '',
-    tags: '',
-  });
-  
-  // Delete dialog state
-  const [deleteConfirm, setDeleteConfirm] = useState<{
-    show: boolean;
-    mediaId?: string;
-    permanent?: boolean;
-  }>({ show: false });
+interface MediaFile {
+  id: string;
+  filename: string;
+  storedName?: string;
+  originalName?: string;
+  category: string; // 'image', 'document', 'video', 'audio', 'other'
+  url: string;
+  size: number;
+  type?: 'image' | 'document';
+  mimeType: string;
+  dimensions?: {
+    width: number;
+    height: number;
+  };
+  width?: number;
+  height?: number;
+  createdAt: string;
+  thumbnailUrl?: string;
+}
 
+// Utility functions
+function getValidImageUrl(url: string): string {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  const API_BASE_URL = getApiBaseUrl();
+  // If URL already has /api/media/file, use it directly
+  if (url.includes('/api/media/file/')) {
+    return url.startsWith('/') ? `${API_BASE_URL}${url}` : `${API_BASE_URL}/${url}`;
+  }
+  // Otherwise, assume it's just a filename and construct the full URL
+  return `${API_BASE_URL}/api/media/file/${url.replace(/^[\/]+/, '')}`;
+}
+
+function isValidImageFile(file: File): boolean {
+  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  return validTypes.includes(file.type);
+}
+
+function isValidFileSize(file: File, maxSizeMB: number): boolean {
+  const maxBytes = maxSizeMB * 1024 * 1024;
+  return file.size <= maxBytes;
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Simple Layout Component
+function DashboardLayout({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function UploadModal({ open, onClose, onUpload, uploading }: {
+  open: boolean;
+  onClose: () => void;
+  onUpload: (files: FileList) => void;
+  uploading: boolean;
+}) {
+  const [dragOver, setDragOver] = useState(false);
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const droppedFiles = e.dataTransfer.files;
+    if (droppedFiles) {
+      onUpload(droppedFiles);
+    }
+  };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      onUpload(e.target.files);
+    }
+  };
   useEffect(() => {
-    fetchMedia();
-    fetchStats();
-  }, [categoryFilter, showDeleted]);
+    if (!open) return;
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [open, onClose]);
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative border border-gray-200 animate-fade-in" onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
+        <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors text-2xl font-bold" onClick={onClose} aria-label="Close">
+          ×
+        </button>
+        <h2 className="text-2xl font-extrabold mb-6 text-center text-blue-700 tracking-tight">Upload Files</h2>
+        <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors flex flex-col items-center justify-center ${dragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-gray-50'} ${uploading ? 'opacity-50' : ''}`}
+        >
+          <div className="flex items-center justify-center mb-4">
+            <Upload className="w-16 h-16 text-blue-400 drop-shadow" />
+          </div>
+          <p className="text-lg font-semibold text-gray-900 mb-2">
+            {uploading ? 'Uploading files...' : 'Drop files here to upload'}
+          </p>
+          <p className="text-gray-500 mb-4">or click below to select files</p>
+          <label className="block w-full">
+            <input type="file" multiple className="hidden" onChange={handleFileChange} disabled={uploading} />
+            <span className="inline-block px-6 py-2 bg-blue-600 text-white font-medium rounded-lg shadow hover:bg-blue-700 cursor-pointer transition-colors">Choose Files</span>
+          </label>
+          {uploading && (
+            <div className="mt-6 w-full">
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '80%' }}></div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      <style>{`
+        .animate-fade-in { animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+      `}</style>
+    </div>
+  );
+}
 
-  const fetchMedia = async () => {
+export default function MediaGallery() {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [user, setUser] = useState<any>(null);
+  
+  const [files, setFiles] = useState<MediaFile[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedType, setSelectedType] = useState<'all' | 'image' | 'document'>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [stats, setStats] = useState({
+    total: 0,
+    images: 0,
+    documents: 0,
+    totalSize: 0
+  });
+
+  // Fetch media files
+  const fetchFiles = useCallback(async () => {
     try {
       setLoading(true);
-      const params: any = {
-        limit: 100,
-        sortBy: 'createdAt',
-        sortOrder: 'desc' as const,
-      };
-
-      if (categoryFilter !== 'all') {
-        params.category = categoryFilter;
+      const params: any = { limit: 100 };
+      
+      if (selectedCategory !== 'all') {
+        params.category = selectedCategory;
       }
-
-      if (searchQuery) {
-        params.search = searchQuery;
-      }
-
-      if (showDeleted) {
-        params.includeDeleted = true;
+      
+      if (selectedType !== 'all') {
+        params.folder = selectedType;
       }
 
       const response = await getMedia(params);
-
-      if (response.success && response.data) {
-        setMedia(response.data.media || []);
-      } else {
-        toast({
-          title: 'Error',
-          description: response.error || 'Failed to load media',
-          variant: 'destructive',
+      if (response.success) {
+        let filteredFiles = response.data?.media || [];
+        console.log('📸 Fetched media files:', filteredFiles);
+        console.log('📸 Sample file:', filteredFiles[0]);
+        
+        // Log image URLs for debugging
+        filteredFiles.forEach((file: any, index: number) => {
+          if (file.category === 'image' || file.mimeType?.startsWith('image/')) {
+            const imageUrl = getValidImageUrl(file.storedName || file.filename);
+            console.log(`🖼️ Image ${index + 1}:`, {
+              filename: file.filename,
+              storedName: file.storedName,
+              category: file.category,
+              mimeType: file.mimeType,
+              url: imageUrl
+            });
+          }
+        });
+        
+        // Filter by search term
+        if (searchTerm) {
+          filteredFiles = filteredFiles.filter((file: any) =>
+            (file.originalName || file.filename).toLowerCase().includes(searchTerm.toLowerCase()) ||
+            file.filename.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+        }
+        
+        setFiles(filteredFiles);
+        
+        // Calculate stats
+        const images = filteredFiles.filter((f: any) => f.category === 'image' || f.mimeType?.startsWith('image/')).length;
+        const documents = filteredFiles.filter((f: any) => f.category === 'document' || (f.category !== 'image' && !f.mimeType?.startsWith('image/'))).length;
+        const totalSize = filteredFiles.reduce((sum: number, f: any) => sum + (f.size || 0), 0);
+        
+        setStats({
+          total: filteredFiles.length,
+          images,
+          documents,
+          totalSize
         });
       }
     } catch (error) {
-      console.error('Error fetching media:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load media',
-        variant: 'destructive',
-      });
+      console.error('Failed to fetch media files:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCategory, selectedType, searchTerm]);
 
-  const fetchStats = async () => {
+  // Fetch categories
+  const fetchCategories = useCallback(async () => {
     try {
-      const response = await getMediaStats();
-      if (response.success && response.data) {
-        setStats(response.data);
-      }
+      // Set default categories
+      setCategories(['general', 'news', 'events', 'gallery', 'documents']);
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      console.error('Failed to fetch categories:', error);
     }
-  };
+  }, []);
 
-  const handleFileUpload = async (files: FileList | File[]) => {
+  useEffect(() => {
+    // Check authentication
+    const checkAuth = async () => {
+      const authenticated = await isAuthenticated();
+      if (!authenticated) {
+        router.push('/admin');
+        return;
+      }
+      setUser({ authenticated: true });
+    };
+    
+    checkAuth();
+    fetchFiles();
+    fetchCategories();
+  }, [router, fetchFiles, fetchCategories]);
+
+  useEffect(() => {
+    fetchFiles();
+  }, [searchTerm, selectedCategory, selectedType, fetchFiles]);
+
+  // Handle file upload
+  const handleFileUpload = async (uploadFiles: FileList) => {
+    if (!uploadFiles || uploadFiles.length === 0) return;
+
     try {
       setUploading(true);
-      const fileArray = Array.from(files);
-
-      if (fileArray.length === 1) {
-        const response = await uploadMedia(fileArray[0]);
-        if (response.success) {
-          toast({
-            title: 'Success',
-            description: 'File uploaded successfully',
-          });
-          fetchMedia();
-          fetchStats();
+      const category = selectedCategory === 'all' ? 'general' : selectedCategory;
+      
+      // Validate files
+      const validFiles: File[] = [];
+      const invalidFiles: string[] = [];
+      
+      for (let i = 0; i < uploadFiles.length; i++) {
+        const file = uploadFiles[i];
+        
+        if (!isValidFileSize(file, 10)) {
+          invalidFiles.push(`${file.name} (file too large)`);
+        } else if (!isValidImageFile(file)) {
+          invalidFiles.push(`${file.name} (unsupported file type)`);
         } else {
-          throw new Error(response.error);
-        }
-      } else {
-        const response = await uploadMultipleMedia(fileArray);
-        if (response.success) {
-          toast({
-            title: 'Success',
-            description: `${fileArray.length} files uploaded successfully`,
-          });
-          fetchMedia();
-          fetchStats();
-        } else {
-          throw new Error(response.error);
+          validFiles.push(file);
         }
       }
-    } catch (error) {
+      
+      if (invalidFiles.length > 0) {
+        toast({
+          title: 'Warning',
+          description: `Some files were skipped: ${invalidFiles.join(', ')}`,
+          variant: 'destructive',
+        });
+      }
+      
+      if (validFiles.length === 0) {
+        toast({
+          title: 'Error',
+          description: 'No valid files to upload',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      // Create FileList from valid files  
+      const dt = new DataTransfer();
+      validFiles.forEach(file => dt.items.add(file));
+      const fileList = dt.files;
+      
+      const response = await uploadMultipleMedia(validFiles, { folder: category });
+      
+      if (response.success) {
+        toast({
+          title: 'Success',
+          description: `${response.data?.length || validFiles.length} file(s) uploaded successfully!`,
+        });
+        await fetchFiles();
+        setShowUploadModal(false);
+      } else {
+        throw new Error(response.error || 'Upload failed');
+      }
+    } catch (error: any) {
+      console.error('Upload failed:', error);
       toast({
-        title: 'Upload Failed',
-        description: error instanceof Error ? error.message : 'Failed to upload files',
+        title: 'Error',
+        description: `Upload failed: ${error.message || 'Please try again'}`,
         variant: 'destructive',
       });
     } finally {
@@ -207,887 +354,365 @@ export default function MediaPage() {
     }
   };
 
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true);
-    } else if (e.type === 'dragleave') {
-      setDragActive(false);
+  // Drag and drop now handled in modal
+
+  // Handle file deletion
+  const handleDeleteFile = async (file: MediaFile) => {
+    try {
+      const response = await deleteMediaApi(file.id);
+      if (response.success) {
+        toast({
+          title: 'Success',
+          description: 'File deleted successfully',
+        });
+        await fetchFiles();
+      } else {
+        throw new Error(response.error || 'Delete failed');
+      }
+      setShowDeleteConfirm(null);
+    } catch (error: any) {
+      console.error('Delete failed:', error);
+      toast({
+        title: 'Error',
+        description: `Delete failed: ${error.message || 'Please try again'}`,
+        variant: 'destructive',
+      });
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFileUpload(e.dataTransfer.files);
-    }
-  };
-
-  const toggleSelectItem = (id: string) => {
-    setSelectedItems(prev =>
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-    );
-  };
-
-  const selectAll = () => {
-    setSelectedItems(media.map(m => m.id));
-  };
-
-  const clearSelection = () => {
-    setSelectedItems([]);
-    setSelectMode(false);
-  };
-
-  const openEditDialog = (item: Media) => {
-    setEditingMedia(item);
-    setEditForm({
-      title: item.title || '',
-      altText: item.altText || '',
-      caption: item.caption || '',
-      description: item.description || '',
-      tags: item.tags.join(', '),
+  // Handle file selection
+  const toggleFileSelection = (fileId: string) => {
+    setSelectedFiles(prev => {
+      if (prev.includes(fileId)) {
+        return prev.filter(id => id !== fileId);
+      } else {
+        return [...prev, fileId];
+      }
     });
   };
 
-  const handleEditSave = async () => {
-    if (!editingMedia) return;
-
-    try {
-      const response = await updateMedia(editingMedia.id, {
-        title: editForm.title,
-        altText: editForm.altText,
-        caption: editForm.caption,
-        description: editForm.description,
-        tags: editForm.tags.split(',').map(t => t.trim()).filter(Boolean),
-      });
-
-      if (response.success) {
-        toast({
-          title: 'Success',
-          description: 'Media updated successfully',
-        });
-        setEditingMedia(null);
-        fetchMedia();
-      } else {
-        throw new Error(response.error);
-      }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to update media',
-        variant: 'destructive',
-      });
-    }
+  // Format date
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
-  const handleDelete = async (id: string, permanent: boolean = false) => {
-    try {
-      const response = await deleteMedia(id, permanent);
-      if (response.success) {
-        toast({
-          title: 'Success',
-          description: permanent ? 'Media permanently deleted' : 'Media moved to trash',
-        });
-        fetchMedia();
-        fetchStats();
-        setDeleteConfirm({ show: false });
-      } else {
-        throw new Error(response.error);
-      }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to delete media',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleRestore = async (id: string) => {
-    try {
-      const response = await restoreMedia(id);
-      if (response.success) {
-        toast({
-          title: 'Success',
-          description: 'Media restored successfully',
-        });
-        fetchMedia();
-        fetchStats();
-      } else {
-        throw new Error(response.error);
-      }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to restore media',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleBulkDelete = async () => {
-    if (selectedItems.length === 0) return;
-
-    try {
-      const response = await bulkDeleteMedia(selectedItems);
-      if (response.success) {
-        toast({
-          title: 'Success',
-          description: `${selectedItems.length} items moved to trash`,
-        });
-        clearSelection();
-        fetchMedia();
-        fetchStats();
-      } else {
-        throw new Error(response.error);
-      }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to delete items',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'image':
-        return <ImageIcon className="w-4 h-4" />;
-      case 'document':
-        return <FileText className="w-4 h-4" />;
-      case 'video':
-        return <Film className="w-4 h-4" />;
-      case 'audio':
-        return <Music className="w-4 h-4" />;
-      default:
-        return <FileText className="w-4 h-4" />;
-    }
+  // Helper to get media file path for AuthenticatedImage component
+  const getMediaFilePath = (file: MediaFile): string => {
+    // Return the API path directly
+    const filename = file.storedName || file.filename;
+    return `/api/media/file/${filename}`;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
-        {/* Modern Header with Actions */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <DashboardLayout title="Media Gallery">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-mm-primary to-mm-primary/70 bg-clip-text text-transparent mb-2">
-              Media Library
-            </h1>
-            <p className="text-gray-600 flex items-center gap-2">
-              <FolderOpen className="w-4 h-4" />
-              Manage your digital assets with ease
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900">Media Gallery</h1>
+            <p className="text-gray-600 mt-1">Manage your media files and uploads</p>
           </div>
           
-          {/* Primary Actions */}
-          <div className="flex gap-3">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setShowDeleted(!showDeleted)}
-              className="hover:bg-gray-100"
+          <div className="flex space-x-3">
+            <button
+              type="button"
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer transition-colors"
+              onClick={() => setShowUploadModal(true)}
             >
-              <Trash2 className="w-4 h-4 mr-2" />
-              {showDeleted ? 'Hide' : 'Show'} Trash
-              {stats && stats.deletedCount > 0 && (
-                <Badge variant="destructive" className="ml-2 bg-red-600 hover:bg-red-700 text-white">
-                  {stats.deletedCount}
-                </Badge>
-              )}
-            </Button>
-            <Button 
-              size="sm"
-              className="bg-gradient-to-r from-mm-primary to-mm-primary/90 hover:from-mm-primary/90 hover:to-mm-primary shadow-lg shadow-mm-primary/20"
-              onClick={() => document.getElementById('media-upload-primary')?.click()}
-              disabled={uploading}
-            >
-              {uploading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Uploading...
-                </>
-              ) : (
-                <>
-                  <Upload className="w-4 h-4 mr-2" />
-                  Upload Files
-                </>
-              )}
-            </Button>
-            <Input
-              type="file"
-              multiple
-              onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
-              className="hidden"
-              id="media-upload-primary"
-              disabled={uploading}
-            />
+              <Upload className="w-4 h-4 mr-2" />
+              Upload Files
+            </button>
           </div>
         </div>
 
-        {/* Modern Stats Dashboard */}
-        {stats && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { 
-                title: 'Total Files', 
-                value: stats.totalMedia, 
-                icon: FolderOpen, 
-                color: 'from-blue-500 to-blue-600',
-                bgColor: 'bg-blue-50',
-                textColor: 'text-blue-600'
-              },
-              { 
-                title: 'Images', 
-                value: stats.totalImages, 
-                icon: ImageIcon, 
-                color: 'from-green-500 to-green-600',
-                bgColor: 'bg-green-50',
-                textColor: 'text-green-600'
-              },
-              { 
-                title: 'Documents', 
-                value: stats.totalDocuments, 
-                icon: FileText, 
-                color: 'from-orange-500 to-orange-600',
-                bgColor: 'bg-orange-50',
-                textColor: 'text-orange-600'
-              },
-              { 
-                title: 'Storage', 
-                value: formatBytes(stats.totalSize), 
-                icon: HardDrive, 
-                color: 'from-purple-500 to-purple-600',
-                bgColor: 'bg-purple-50',
-                textColor: 'text-purple-600'
-              }
-            ].map((stat, idx) => (
-              <Card key={idx} className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
-                <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-5 transition-opacity`}></div>
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-start mb-3">
-                    <div className={`${stat.bgColor} p-3 rounded-xl`}>
-                      <stat.icon className={`w-5 h-5 ${stat.textColor}`} />
-                    </div>
-                    <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">Live</div>
-                  </div>
-                  <div className="text-3xl font-bold text-gray-900 mb-1">{stat.value}</div>
-                  <div className="text-sm text-gray-600">{stat.title}</div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-
-        {/* Modern Upload Zone */}
-        <Card
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
-          onDrop={handleDrop}
-          className={`border-2 border-dashed transition-all duration-300 overflow-hidden ${
-            dragActive 
-              ? 'border-mm-primary bg-gradient-to-br from-mm-primary/5 to-mm-primary/10 shadow-lg scale-[1.02]' 
-              : 'border-gray-300 hover:border-mm-primary/50 hover:shadow-md'
-          }`}
-        >
-          <CardContent className="p-12">
-            <div className="text-center">
-              <div className={`mx-auto mb-6 w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 ${
-                dragActive ? 'bg-gradient-to-br from-mm-primary to-mm-primary/80 scale-110' : 'bg-gradient-to-br from-gray-100 to-gray-200'
-              }`}>
-                <Upload className={`w-10 h-10 transition-colors ${dragActive ? 'text-white' : 'text-gray-400'}`} />
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <div className="flex items-center">
+              <div className="p-3 bg-blue-100 rounded-lg">
+                <FolderOpen className="w-6 h-6 text-blue-600" />
               </div>
-              <h3 className="text-xl font-bold mb-2 text-gray-900">
-                {dragActive ? 'Drop files here!' : 'Upload Your Media'}
-              </h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                Drag and drop your files here, or click the button below to browse.<br/>
-                <span className="text-sm text-gray-500">Supports images, documents, videos (max 10MB)</span>
-              </p>
-              <Button 
-                variant="outline" 
-                size="lg"
-                onClick={() => document.getElementById('media-upload')?.click()}
-                disabled={uploading}
-                className="shadow-lg hover:shadow-xl transition-all"
-              >
-                {uploading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-5 h-5 mr-2" />
-                    Browse Files
-                  </>
-                )}
-              </Button>
-              <Input
-                type="file"
-                multiple
-                onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
-                className="hidden"
-                id="media-upload"
-                disabled={uploading}
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Files</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <div className="flex items-center">
+              <div className="p-3 bg-green-100 rounded-lg">
+                <ImageIcon className="w-6 h-6 text-green-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Images</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.images}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <div className="flex items-center">
+              <div className="p-3 bg-purple-100 rounded-lg">
+                <File className="w-6 h-6 text-purple-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Documents</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.documents}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <div className="flex items-center">
+              <div className="p-3 bg-orange-100 rounded-lg">
+                <HardDrive className="w-6 h-6 text-orange-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Storage</p>
+                <p className="text-2xl font-bold text-gray-900">{formatFileSize(stats.totalSize)}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Upload Modal */}
+        <UploadModal
+          open={showUploadModal}
+          onClose={() => setShowUploadModal(false)}
+          onUpload={async (files) => {
+            await handleFileUpload(files);
+            setShowUploadModal(false);
+          }}
+          uploading={uploading}
+        />
+
+        {/* Filters and Controls */}
+        <div className="bg-white p-4 rounded-lg shadow-sm border">
+          <div className="flex flex-wrap gap-4 items-center">
+            {/* Search */}
+            <div className="relative flex-1 min-w-64">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search files..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
               />
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Modern Toolbar */}
-        <Card className="border-0 shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex flex-col lg:flex-row gap-4">
-              {/* Search */}
-              <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
-                  placeholder="Search by name, tag, or type..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 h-12 border-gray-200 focus:ring-2 focus:ring-mm-primary/20"
-                />
-              </div>
+            {/* Category Filter */}
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">All Categories</option>
+              {categories.map(category => (
+                <option key={category} value={category}>
+                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                </option>
+              ))}
+            </select>
 
-              {/* Filters & Actions */}
-              <div className="flex flex-wrap gap-3">
-                {/* Category Filter */}
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className="w-48 h-12">
-                    <Filter className="w-4 h-4 mr-2" />
-                    <SelectValue placeholder="Filter by type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="image">📸 Images</SelectItem>
-                    <SelectItem value="document">📄 Documents</SelectItem>
-                    <SelectItem value="video">🎥 Videos</SelectItem>
-                    <SelectItem value="audio">🎵 Audio</SelectItem>
-                  </SelectContent>
-                </Select>
+            {/* Type Filter */}
+            <select
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value as any)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">All Types</option>
+              <option value="image">Images</option>
+              <option value="document">Documents</option>
+            </select>
 
-                {/* View Mode Toggle */}
-                <div className="flex gap-1 border border-gray-200 rounded-lg p-1">
-                  <Button
-                    variant={viewMode === 'grid' ? 'primary' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('grid')}
-                    className={viewMode === 'grid' ? 'shadow-md' : ''}
-                  >
-                    <Grid3x3 className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === 'list' ? 'primary' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('list')}
-                    className={viewMode === 'list' ? 'shadow-md' : ''}
-                  >
-                    <List className="w-4 h-4" />
-                  </Button>
-                </div>
-
-                {/* Refresh */}
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={fetchMedia}
-                  className="h-12 px-4"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Selection & Bulk Actions */}
-            {(selectMode || selectedItems.length > 0) && (
-              <div className="flex items-center gap-3 mt-4 pt-4 border-t">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSelectMode(!selectMode);
-                    setSelectedItems([]);
-                  }}
-                >
-                  {selectMode ? 'Cancel Selection' : 'Select Multiple'}
-                </Button>
-
-                {selectMode && (
-                  <>
-                    <Button variant="outline" size="sm" onClick={selectAll}>
-                      Select All ({media.length})
-                    </Button>
-                    {selectedItems.length > 0 && (
-                      <Button variant="outline" size="sm" onClick={clearSelection}>
-                        Clear
-                      </Button>
-                    )}
-                  </>
-                )}
-
-                {selectedItems.length > 0 && (
-                  <div className="flex items-center gap-3 ml-auto">
-                    <Badge variant="default" className="bg-mm-primary text-white px-3 py-1">
-                      {selectedItems.length} selected
-                    </Badge>
-                    <Button
-                      variant="accent"
-                      size="sm"
-                      onClick={handleBulkDelete}
-                      className="bg-red-600 hover:bg-red-700 text-white shadow-md"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete Selected
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Media Grid/List */}
-        {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="w-12 h-12 animate-spin text-mm-primary" />
-          </div>
-        ) : media.length === 0 ? (
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-16">
-              <div className="text-center">
-                <div className="mx-auto w-24 h-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-6">
-                  <ImageIcon className="w-12 h-12 text-gray-400" />
-                </div>
-                <h3 className="text-2xl font-bold mb-3 text-gray-900">No media files yet</h3>
-                <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                  Upload your first files to get started with the media library
-                </p>
-                <Button 
-                  size="lg"
-                  className="bg-gradient-to-r from-mm-primary to-mm-primary/90 shadow-lg"
-                  onClick={() => document.getElementById('media-upload')?.click()}
-                >
-                  <Upload className="w-5 h-5 mr-2" />
-                  Upload Now
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ) : viewMode === 'grid' ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
-            {media.map((item) => (
-              <div
-                key={item.id}
-                className={`group relative flex flex-col rounded-xl overflow-hidden transition-all duration-300 ${
-                  selectedItems.includes(item.id)
-                    ? 'ring-2 ring-mm-primary shadow-2xl scale-105'
-                    : 'shadow-lg hover:shadow-2xl hover:scale-105'
-                } ${item.isDeleted ? 'opacity-60' : ''}`}
+            {/* View Mode */}
+            <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 ${
+                  viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+                }`}
               >
-                {/* Image Container - Fixed Aspect Ratio */}
-                <div className="relative w-full bg-gradient-to-br from-gray-100 to-gray-200" style={{ paddingBottom: '100%' }}>
-                  <div
-                    className="absolute inset-0 flex items-center justify-center cursor-pointer overflow-hidden"
-                    onClick={() => selectMode && toggleSelectItem(item.id)}
-                  >
-                    {item.category === 'image' ? (
+                <Grid className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 ${
+                  viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Files Display */}
+        <div className="bg-white rounded-lg shadow-sm border">
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          ) : files.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+              <FolderOpen className="w-16 h-16 mb-4" />
+              <p className="text-lg font-medium">No files found</p>
+              <p>Upload some files to get started</p>
+            </div>
+          ) : viewMode === 'grid' ? (
+            <div className="p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {files.map(file => (
+                <div
+                  key={file.id}
+                  className="relative group border border-gray-200 rounded-lg hover:shadow-md transition-shadow overflow-hidden"
+                >
+                  <div className="relative aspect-square p-2">
+                    {(file.category === 'image' || file.mimeType?.startsWith('image/')) ? (
                       <AuthenticatedImage
-                        filePath={`/api/media/file/${item.storedName}`}
-                        alt={item.altText || item.filename}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                        fallbackText="Failed to load"
+                        filePath={getMediaFilePath(file)}
+                        alt={file.originalName || file.filename}
+                        className="absolute inset-2 w-[calc(100%-1rem)] h-[calc(100%-1rem)] object-cover rounded"
+                        fallbackText=""
                       />
                     ) : (
-                      <div className="text-gray-400 text-5xl">
-                        {getCategoryIcon(item.category)}
+                      <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded">
+                        <File className="w-8 h-8 text-gray-400" />
                       </div>
                     )}
                   </div>
-
-                  {/* Selection Checkbox */}
-                  {selectMode && (
-                    <div className={`absolute top-3 right-3 rounded-full p-2 shadow-lg z-20 transition-all ${
-                      selectedItems.includes(item.id)
-                        ? 'bg-mm-primary text-white scale-110'
-                        : 'bg-white/90 text-gray-400'
-                    }`}>
-                      <Check className="w-5 h-5" />
+                  
+                  <div className="p-2 border-t">
+                    <div className="text-xs font-medium text-gray-900 truncate" title={file.originalName || file.filename}>
+                      {file.originalName || file.filename}
                     </div>
-                  )}
-
-                  {/* Trash Badge */}
-                  {item.isDeleted && (
-                    <div className="absolute top-3 left-3 z-10">
-                      <Badge className="bg-red-600 hover:bg-red-700 text-white font-semibold shadow-lg">
-                        <Trash2 className="w-3 h-3 mr-1" />
-                        Trashed
-                      </Badge>
+                    <div className="text-xs text-gray-500 mt-0.5">
+                      {formatFileSize(file.size)}
                     </div>
-                  )}
+                  </div>
 
-                  {/* Hover Actions Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-3 z-10">
-                    {!item.isDeleted ? (
-                      <>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            className="bg-white hover:bg-gray-100 text-gray-900 shadow-xl"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              window.open(getAuthenticatedUrl(item.url), '_blank');
-                            }}
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            View
-                          </Button>
-                          <Button
-                            size="sm"
-                            className="bg-mm-primary hover:bg-mm-primary/90 text-white shadow-xl"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openEditDialog(item);
-                            }}
-                          >
-                            <Edit className="w-4 h-4 mr-1" />
-                            Edit
-                          </Button>
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="accent"
-                          className="bg-red-600 hover:bg-red-700 text-white shadow-xl"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDeleteConfirm({ show: true, mediaId: item.id, permanent: false });
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          Delete
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          size="sm"
-                          className="bg-green-600 hover:bg-green-700 text-white shadow-xl"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRestore(item.id);
-                          }}
-                        >
-                          <RefreshCw className="w-4 h-4 mr-1" />
-                          Restore
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="accent"
-                          className="bg-red-600 hover:bg-red-700 text-white shadow-xl"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDeleteConfirm({ show: true, mediaId: item.id, permanent: true });
-                          }}
-                        >
-                          <X className="w-4 h-4 mr-1" />
-                          Permanent Delete
-                        </Button>
-                      </>
-                    )}
+                  {/* Actions */}
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                    <div className="flex space-x-1">
+                      <button
+                        onClick={() => window.open(file.url, '_blank')}
+                        className="p-1.5 bg-white rounded-md shadow-md hover:bg-gray-50 border border-gray-200"
+                        title="View"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-gray-600" />
+                      </button>
+                      <button
+                        onClick={() => setShowDeleteConfirm(file.id)}
+                        className="p-1.5 bg-white rounded-md shadow-md hover:bg-gray-50 border border-gray-200"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-red-600" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-                {/* File Info - Enhanced */}
-                <div className="p-4 bg-white flex-shrink-0">
-                  <p className="text-sm font-semibold truncate mb-1.5 text-gray-900 leading-tight" title={item.title || item.filename}>
-                    {item.title || item.filename}
-                  </p>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span className="truncate">{formatBytes(item.size)}</span>
-                    <Badge variant="secondary" className="text-xs flex-shrink-0 ml-2">
-                      {item.category}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {media.map((item) => (
-              <Card
-                key={item.id}
-                className={`border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden ${
-                  selectedItems.includes(item.id)
-                    ? 'ring-2 ring-mm-primary shadow-xl'
-                    : ''
-                } ${item.isDeleted ? 'opacity-60' : ''}`}
-              >
-                <CardContent className="p-6">
-                  <div
-                    className="flex items-center gap-6 cursor-pointer"
-                    onClick={() => selectMode && toggleSelectItem(item.id)}
-                  >
-                    {/* Thumbnail */}
-                    <div className="relative w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden flex-shrink-0 shadow-md">
-                      {item.category === 'image' ? (
+              ))}
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-200">
+              {files.map(file => (
+                <div key={file.id} className="p-4 hover:bg-gray-50" title={file.originalName || file.filename}>
+                  <div className="flex items-center space-x-4">
+                    <div className="relative w-16 h-16 rounded overflow-hidden flex-shrink-0 bg-gray-50">
+                      {(file.category === 'image' || file.mimeType?.startsWith('image/')) ? (
                         <AuthenticatedImage
-                          filePath={`/api/media/file/${item.storedName}`}
-                          alt={item.altText || item.filename}
-                          className="w-full h-full object-cover"
-                          fallbackText="N/A"
+                          filePath={getMediaFilePath(file)}
+                          alt={file.originalName || file.filename}
+                          className="absolute inset-0 w-full h-full object-contain"
+                          fallbackText=""
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-3xl">
-                          {getCategoryIcon(item.category)}
-                        </div>
-                      )}
-                      {selectMode && (
-                        <div className={`absolute top-2 right-2 rounded-full p-1.5 shadow-lg ${
-                          selectedItems.includes(item.id)
-                            ? 'bg-mm-primary text-white'
-                            : 'bg-white/90 text-gray-400'
-                        }`}>
-                          <Check className="w-4 h-4" />
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                          <File className="w-6 h-6 text-gray-400" />
                         </div>
                       )}
                     </div>
-
-                    {/* File Info */}
+                    
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-bold text-lg truncate text-gray-900">{item.title || item.filename}</h3>
-                        {item.isDeleted && (
-                          <Badge className="bg-red-600 hover:bg-red-700 text-white font-semibold shadow-md">
-                            <Trash2 className="w-3 h-3 mr-1" />
-                            Trashed
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
-                        <span className="font-medium">{formatBytes(item.size)}</span>
-                        <Badge variant="secondary" className="font-medium">
-                          {item.category}
-                        </Badge>
-                        {item.width && item.height && (
-                          <span className="text-gray-500">{item.width}×{item.height}px</span>
-                        )}
-                      </div>
-                      {item.tags.length > 0 && (
-                        <div className="flex gap-2 flex-wrap mt-3">
-                          {item.tags.map((tag, i) => (
-                            <Badge key={i} variant="outline" className="text-xs border-mm-primary/30 text-mm-primary">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
+                      <p className="text-sm font-medium text-gray-900 truncate" title={file.originalName || file.filename}>
+                        {file.originalName || file.filename}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {formatFileSize(file.size)} • {file.category}
+                        {(file.dimensions?.width || file.width) && ` • ${file.dimensions?.width || file.width}×${file.dimensions?.height || file.height}`}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        <Calendar className="w-3 h-3 inline mr-1" />
+                        {formatDate(file.createdAt)}
+                      </p>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-2 flex-shrink-0">
-                      {!item.isDeleted ? (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="hover:bg-gray-100 shadow-md"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              window.open(getAuthenticatedUrl(item.url), '_blank');
-                            }}
-                          >
-                            <Eye className="w-4 h-4 mr-2" />
-                            View
-                          </Button>
-                          <Button
-                            size="sm"
-                            className="bg-mm-primary hover:bg-mm-primary/90 text-white shadow-md"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openEditDialog(item);
-                            }}
-                          >
-                            <Edit className="w-4 h-4 mr-2" />
-                            Edit
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="accent"
-                            className="bg-red-600 hover:bg-red-700 text-white shadow-md"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteConfirm({ show: true, mediaId: item.id, permanent: false });
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button
-                            size="sm"
-                            className="bg-green-600 hover:bg-green-700 text-white shadow-md"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRestore(item.id);
-                            }}
-                          >
-                            <RefreshCw className="w-4 h-4 mr-2" />
-                            Restore
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="accent"
-                            className="bg-red-600 hover:bg-red-700 text-white shadow-md"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteConfirm({ show: true, mediaId: item.id, permanent: true });
-                            }}
-                          >
-                            <X className="w-4 h-4 mr-2" />
-                            Delete Forever
-                          </Button>
-                        </>
-                      )}
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => window.open(file.url, '_blank')}
+                        className="p-2 text-gray-400 hover:text-gray-600"
+                        title="View"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setShowDeleteConfirm(file.id)}
+                        className="p-2 text-gray-400 hover:text-red-600"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Edit Dialog */}
-      <Dialog open={!!editingMedia} onOpenChange={() => setEditingMedia(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">Edit Media</DialogTitle>
-            <DialogDescription>Update media information and metadata</DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-6">
-            {editingMedia?.category === 'image' && (
-              <div className="w-full h-64 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden shadow-inner">
-                <AuthenticatedImage
-                  filePath={`/api/media/file/${editingMedia.storedName}`}
-                  alt={editingMedia.filename}
-                  className="w-full h-full object-contain"
-                />
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-screen items-center justify-center p-4">
+            <div className="fixed inset-0 bg-black bg-opacity-25" onClick={() => setShowDeleteConfirm(null)} />
+            
+            <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Delete File
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Are you sure you want to delete this file? This action cannot be undone.
+              </p>
+              
+              <div className="flex space-x-3 justify-end">
+                <button
+                  onClick={() => setShowDeleteConfirm(null)}
+                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    const file = files.find(f => f.id === showDeleteConfirm);
+                    if (file) handleDeleteFile(file);
+                  }}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                >
+                  Delete
+                </button>
               </div>
-            )}
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="title" className="text-sm font-semibold">Title</Label>
-                <Input
-                  id="title"
-                  value={editForm.title}
-                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                  placeholder="Enter title"
-                  className="mt-2"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="altText" className="text-sm font-semibold">Alt Text</Label>
-                <Input
-                  id="altText"
-                  value={editForm.altText}
-                  onChange={(e) => setEditForm({ ...editForm, altText: e.target.value })}
-                  placeholder="Alternative text for accessibility"
-                  className="mt-2"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="caption" className="text-sm font-semibold">Caption</Label>
-              <Input
-                id="caption"
-                value={editForm.caption}
-                onChange={(e) => setEditForm({ ...editForm, caption: e.target.value })}
-                placeholder="Brief caption"
-                className="mt-2"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="description" className="text-sm font-semibold">Description</Label>
-              <Textarea
-                id="description"
-                value={editForm.description}
-                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                placeholder="Detailed description"
-                rows={3}
-                className="mt-2"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="tags" className="text-sm font-semibold">Tags <span className="text-gray-500 font-normal">(comma separated)</span></Label>
-              <Input
-                id="tags"
-                value={editForm.tags}
-                onChange={(e) => setEditForm({ ...editForm, tags: e.target.value })}
-                placeholder="tag1, tag2, tag3"
-                className="mt-2"
-              />
             </div>
           </div>
-
-          <DialogFooter className="gap-3">
-            <Button variant="outline" onClick={() => setEditingMedia(null)} className="shadow-md">
-              Cancel
-            </Button>
-            <Button onClick={handleEditSave} className="bg-gradient-to-r from-mm-primary to-mm-primary/90 shadow-lg">
-              <Check className="w-4 h-4 mr-2" />
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modern Delete Confirmation Dialog */}
-      <AlertDialog
-        open={deleteConfirm.show}
-        onOpenChange={(open) => setDeleteConfirm({ show: open })}
-      >
-        <AlertDialogContent className="border-0 shadow-2xl">
-          <AlertDialogHeader>
-            <div className="mx-auto w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
-              <Trash2 className="w-8 h-8 text-red-600" />
-            </div>
-            <AlertDialogTitle className="text-2xl text-center">
-              {deleteConfirm.permanent ? 'Delete Permanently?' : 'Move to Trash?'}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-center text-base">
-              {deleteConfirm.permanent
-                ? 'This action cannot be undone. The media file will be permanently deleted from the server.'
-                : 'The media will be moved to trash. You can restore it later if needed.'}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="gap-3 sm:gap-3">
-            <AlertDialogCancel className="shadow-md">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() =>
-                deleteConfirm.mediaId &&
-                handleDelete(deleteConfirm.mediaId, deleteConfirm.permanent)
-              }
-              className="bg-red-600 hover:bg-red-700 text-white shadow-lg"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              {deleteConfirm.permanent ? 'Delete Forever' : 'Move to Trash'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+        </div>
+      )}
+    </DashboardLayout>
   );
 }
